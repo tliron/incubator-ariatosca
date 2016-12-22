@@ -25,16 +25,13 @@ import shutil
 import tempfile
 from glob import glob
 from importlib import import_module
+from datetime import datetime
 
-from yaml import safe_load, YAMLError
+from ruamel import yaml # @UnresolvedImport
 
 from .. import extension
-from .. import (application_model_storage, application_resource_storage)
 from ..logger import LoggerMixin
-from ..storage import (FileSystemModelDriver, FileSystemResourceDriver)
-from ..orchestrator.context.workflow import WorkflowContext
-from ..orchestrator.workflows.core.engine import Engine
-from ..orchestrator.workflows.executor.process import ProcessExecutor
+from ..orchestrator import operation
 from ..parser import iter_specifications
 from ..parser.consumption import (
     ConsumptionContext,
@@ -47,24 +44,18 @@ from ..parser.consumption import (
     Instance
 )
 from ..parser.loading import LiteralLocation, UriLocation
+from ..storage import model
 from ..utils.application import StorageManager
 from ..utils.caching import cachedmethod
 from ..utils.console import (puts, Colored, indent)
 from ..utils.imports import (import_fullname, import_modules)
-from . import csar
+from .workflow import Workflow
 from .exceptions import (
     AriaCliFormatInputsError,
     AriaCliYAMLInputsError,
     AriaCliInvalidInputsError
 )
-from .storage import (
-    local_resource_storage,
-    create_local_storage,
-    local_model_storage,
-    create_user_space,
-    user_space,
-    local_storage,
-)
+from . import csar
 
 
 class BaseCommand(LoggerMixin):
@@ -101,9 +92,9 @@ class BaseCommand(LoggerMixin):
                 try:
                     parsed_dict.update(json.loads(input_string))
                 except BaseException:
-                    parsed_dict.update((input.split('=')
-                                        for input in input_string.split(';')
-                                        if input))
+                    parsed_dict.update((i.split('=')
+                                        for i in input_string.split(';')
+                                        if i))
             except Exception as exc:
                 raise AriaCliFormatInputsError(str(exc), inputs=input_string)
 
@@ -111,8 +102,8 @@ class BaseCommand(LoggerMixin):
             self.logger.info('Processing inputs source: {0}'.format(input_path))
             try:
                 with open(input_path) as input_file:
-                    content = safe_load(input_file)
-            except YAMLError as exc:
+                    content = yaml.safe_load(input_file)
+            except yaml.YAMLError as exc:
                 raise AriaCliYAMLInputsError(
                     '"{0}" is not a valid YAML. {1}'.format(input_path, str(exc)))
             if isinstance(content, dict):
@@ -135,6 +126,178 @@ class BaseCommand(LoggerMixin):
             _format_to_dict(input_string)
         return parsed_dict
 
+
+class ParseCommand(BaseCommand):
+    def __call__(self, args_namespace, unknown_args):
+        super(ParseCommand, self).__call__(args_namespace, unknown_args)
+
+        if args_namespace.prefix:
+            for prefix in args_namespace.prefix:
+                extension.parser.uri_loader_prefix().append(prefix)
+
+        cachedmethod.ENABLED = args_namespace.cached_methods
+
+        context = ParseCommand.create_context_from_namespace(args_namespace)
+        context.args = unknown_args
+
+        consumer = ConsumerChain(context, (Read, Validate))
+
+        consumer_class_name = args_namespace.consumer
+        dumper = None
+        if consumer_class_name == 'presentation':
+            dumper = consumer.consumers[0]
+        elif consumer_class_name == 'model':
+            consumer.append(Model)
+        elif consumer_class_name == 'types':
+            consumer.append(Model, Types)
+        elif consumer_class_name == 'instance':
+            consumer.append(Model, Inputs, Instance)
+        else:
+            consumer.append(Model, Inputs, Instance)
+            consumer.append(import_fullname(consumer_class_name))
+
+        if dumper is None:
+            # Default to last consumer
+            dumper = consumer.consumers[-1]
+
+        consumer.consume()
+
+        if not context.validation.dump_issues():
+            dumper.dump()
+
+    @staticmethod
+    def create_context_from_namespace(namespace, **kwargs):
+        args = vars(namespace).copy()
+        args.update(kwargs)
+        return ParseCommand.create_context(**args)
+
+    @staticmethod
+    def create_context(uri,
+                       loader_source,
+                       reader_source,
+                       presenter_source,
+                       presenter,
+                       debug,
+                       **kwargs):
+        context = ConsumptionContext()
+        context.loading.loader_source = import_fullname(loader_source)()
+        context.reading.reader_source = import_fullname(reader_source)()
+        context.presentation.location = UriLocation(uri) if isinstance(uri, basestring) else uri
+        context.presentation.presenter_source = import_fullname(presenter_source)()
+        context.presentation.presenter_class = import_fullname(presenter)
+        context.presentation.print_exceptions = debug
+        return context
+
+
+NODE_OPERATIONS = {
+    'tosca.interfaces.node.lifecycle.Standard.create': {
+        'operation': '%s.default_create' % __name__
+    },
+    'tosca.interfaces.node.lifecycle.Standard.configure': {
+        'operation': '%s.default_configure' % __name__
+    },
+    'tosca.interfaces.node.lifecycle.Standard.start': {
+        'operation': '%s.default_start' % __name__
+    },
+    'tosca.interfaces.node.lifecycle.Standard.stop': {
+        'operation': '%s.default_stop' % __name__
+    },
+    'tosca.interfaces.node.lifecycle.Standard.delete': {
+        'operation': '%s.default_delete' % __name__
+    }
+}
+
+@operation
+def default_create(ctx, **kwargs):
+    print '>>> create', kwargs
+
+@operation
+def default_configure(ctx, **kwargs):
+    print '>>> configure', kwargs
+
+@operation
+def default_start(ctx, **kwargs):
+    print '>>> start', kwargs
+
+@operation
+def default_stop(ctx, **kwargs):
+    print '>>> stop', kwargs
+
+@operation
+def default_delete(ctx, **kwargs):
+    print '>>> delete', kwargs
+
+
+class WorkflowCommand(BaseCommand):
+    def __call__(self, args_namespace, unknown_args):
+        super(WorkflowCommand, self).__call__(args_namespace, unknown_args)
+        operation = '%s.%s' % (args_namespace.interface, args_namespace.operation)
+        workflow = Workflow(
+            args_namespace.deployment_id,
+            self.initialize_model_storage,
+            operation)
+        workflow.execute()
+
+    def initialize_model_storage(self, model_storage):
+        blueprint = self.create_blueprint()    
+        model_storage.blueprint.put(blueprint)
+        deployment = self.create_deployment(blueprint)
+        model_storage.deployment.put(deployment)
+        node = self.create_node(deployment)
+        model_storage.node.put(node)
+        node_instance = self.create_node_instance(node)
+        model_storage.node_instance.put(node_instance)
+
+    def create_blueprint(self):
+        now = datetime.utcnow()
+        return model.Blueprint(
+            plan={},
+            name='cli_blueprint',
+            description=None,
+            created_at=now,
+            updated_at=now,
+            main_file_name='main_file_name')
+    
+    def create_deployment(self, blueprint):
+        now = datetime.utcnow()
+        return model.Deployment(
+            name='cli_deployment',
+            blueprint_fk=blueprint.id,
+            description='',
+            created_at=now,
+            updated_at=now,
+            workflows={},
+            inputs={},
+            groups={},
+            permalink='',
+            policy_triggers={},
+            policy_types={},
+            outputs={},
+            scaling_groups={})
+
+    def create_node(self, deployment):
+        return model.Node(
+            name='host',
+            type='test_node_type',
+            type_hierarchy=[],
+            number_of_instances=1,
+            planned_number_of_instances=1,
+            deploy_number_of_instances=1,
+            properties={},
+            operations=NODE_OPERATIONS,
+            min_number_of_instances=1,
+            max_number_of_instances=1,
+            deployment_fk=deployment.id)
+    
+    def create_node_instance(self, node):
+        return model.NodeInstance(
+            name='host_instance',
+            runtime_properties={},
+            version=None,
+            node_fk=node.id,
+            state='',
+            scaling_groups=[])
+   
 
 class InitCommand(BaseCommand):
     """
@@ -310,98 +473,7 @@ class ExecuteCommand(BaseCommand):
             raise
 
 
-class ParseCommand(BaseCommand):
-    def __call__(self, args_namespace, unknown_args):
-        super(ParseCommand, self).__call__(args_namespace, unknown_args)
-
-        if args_namespace.prefix:
-            for prefix in args_namespace.prefix:
-                extension.parser.uri_loader_prefix().append(prefix)
-
-        cachedmethod.ENABLED = args_namespace.cached_methods
-
-        context = ParseCommand.create_context_from_namespace(args_namespace)
-        context.args = unknown_args
-
-        consumer = ConsumerChain(context, (Read, Validate))
-
-        consumer_class_name = args_namespace.consumer
-        dumper = None
-        if consumer_class_name == 'presentation':
-            dumper = consumer.consumers[0]
-        elif consumer_class_name == 'model':
-            consumer.append(Model)
-        elif consumer_class_name == 'types':
-            consumer.append(Model, Types)
-        elif consumer_class_name == 'instance':
-            consumer.append(Model, Inputs, Instance)
-        else:
-            consumer.append(Model, Inputs, Instance)
-            consumer.append(import_fullname(consumer_class_name))
-
-        if dumper is None:
-            # Default to last consumer
-            dumper = consumer.consumers[-1]
-
-        consumer.consume()
-
-        if not context.validation.dump_issues():
-            dumper.dump()
-
-    @staticmethod
-    def create_context_from_namespace(namespace, **kwargs):
-        args = vars(namespace).copy()
-        args.update(kwargs)
-        return ParseCommand.create_context(**args)
-
-    @staticmethod
-    def create_context(uri,
-                       loader_source,
-                       reader_source,
-                       presenter_source,
-                       presenter,
-                       debug,
-                       **kwargs):
-        context = ConsumptionContext()
-        context.loading.loader_source = import_fullname(loader_source)()
-        context.reading.reader_source = import_fullname(reader_source)()
-        context.presentation.location = UriLocation(uri) if isinstance(uri, basestring) else uri
-        context.presentation.presenter_source = import_fullname(presenter_source)()
-        context.presentation.presenter_class = import_fullname(presenter)
-        context.presentation.print_exceptions = debug
-        return context
-
-
-class SpecCommand(BaseCommand):
-    def __call__(self, args_namespace, unknown_args):
-        super(SpecCommand, self).__call__(args_namespace, unknown_args)
-
-        # Make sure that all @dsl_specification decorators are processed
-        for pkg in extension.parser.specification_package():
-            import_modules(pkg)
-
-        # TODO: scan YAML documents as well
-
-        if args_namespace.csv:
-            writer = csv.writer(sys.stdout, quoting=csv.QUOTE_ALL)
-            writer.writerow(('Specification', 'Section', 'Code', 'URL'))
-            for spec, sections in iter_specifications():
-                for section, details in sections:
-                    writer.writerow((spec, section, details['code'], details['url']))
-
-        else:
-            for spec, sections in iter_specifications():
-                puts(Colored.cyan(spec))
-                with indent(2):
-                    for section, details in sections:
-                        puts(Colored.blue(section))
-                        with indent(2):
-                            for k, v in details.iteritems():
-                                puts('%s: %s' % (Colored.magenta(k), v))
-
-
 class BaseCSARCommand(BaseCommand):
-
     @staticmethod
     def _parse_and_dump(reader):
         context = ConsumptionContext()
@@ -439,7 +511,6 @@ class BaseCSARCommand(BaseCommand):
 
 
 class CSARCreateCommand(BaseCSARCommand):
-
     def __call__(self, args_namespace, unknown_args):
         super(CSARCreateCommand, self).__call__(args_namespace, unknown_args)
         csar.write(
@@ -451,7 +522,6 @@ class CSARCreateCommand(BaseCSARCommand):
 
 
 class CSAROpenCommand(BaseCSARCommand):
-
     def __call__(self, args_namespace, unknown_args):
         super(CSAROpenCommand, self).__call__(args_namespace, unknown_args)
         self._read(
@@ -460,7 +530,34 @@ class CSAROpenCommand(BaseCSARCommand):
 
 
 class CSARValidateCommand(BaseCSARCommand):
-
     def __call__(self, args_namespace, unknown_args):
         super(CSARValidateCommand, self).__call__(args_namespace, unknown_args)
         self._validate(args_namespace.source)
+
+
+class SpecCommand(BaseCommand):
+    def __call__(self, args_namespace, unknown_args):
+        super(SpecCommand, self).__call__(args_namespace, unknown_args)
+
+        # Make sure that all @dsl_specification decorators are processed
+        for pkg in extension.parser.specification_package():
+            import_modules(pkg)
+
+        # TODO: scan YAML documents as well
+
+        if args_namespace.csv:
+            writer = csv.writer(sys.stdout, quoting=csv.QUOTE_ALL)
+            writer.writerow(('Specification', 'Section', 'Code', 'URL'))
+            for spec, sections in iter_specifications():
+                for section, details in sections:
+                    writer.writerow((spec, section, details['code'], details['url']))
+
+        else:
+            for spec, sections in iter_specifications():
+                puts(Colored.cyan(spec))
+                with indent(2):
+                    for section, details in sections:
+                        puts(Colored.blue(section))
+                        with indent(2):
+                            for k, v in details.iteritems():
+                                puts('%s: %s' % (Colored.magenta(k), v))

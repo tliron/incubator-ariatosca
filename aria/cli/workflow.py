@@ -14,6 +14,7 @@
 # limitations under the License.
 
 import platform
+import os
 
 from sqlalchemy import (create_engine, orm) # @UnresolvedImport
 from sqlalchemy.pool import StaticPool # @UnresolvedImport
@@ -29,7 +30,9 @@ from ..storage.sql_mapi import SQLAlchemyModelAPI
 from ..storage.filesystem_rapi import FileSystemResourceAPI
 
 
-SQLITE_MEMORY = 'sqlite:///:memory:'
+# Causes serious threading problems:
+# https://gehrcke.de/2015/05/in-memory-sqlite-database-and-flask-a-threading-trap/
+SQLITE_IN_MEMORY = 'sqlite:///:memory:'
 
 
 class Workflow(object):
@@ -41,10 +44,38 @@ class Workflow(object):
     def __init__(self, deployment_id, initialize_model_storage_fn, operation):
         @workflow
         def cli_workflow(ctx, graph):
-            for n in ctx.model.node_instance.iter():
-                task = self.create_node_instance_task(n, operation)
-                graph.add_tasks(task)
+            def create_node_tasks(operation, relationship_source_operation=None,
+                                  relationship_target_operation=None):
+                for n in ctx.model.node_instance.iter():
+                    if relationship_source_operation:
+                        create_relationship_tasks(relationship_source_operation, n,
+                                                  'source_operations')
 
+                    if operation in n.node.operations:
+                        task = self.create_node_instance_task(n, operation)
+                        graph.add_tasks(task)
+
+                    if relationship_target_operation:
+                        create_relationship_tasks(relationship_target_operation, n,
+                                                  'target_operations')
+
+            def create_relationship_tasks(operation, n, operations_attr):
+                for r in ctx.model.relationship_instance.iter():
+                    if r.source_node_instance.id == n.id:
+                        if operation in getattr(r.relationship, operations_attr):
+                            task = self.create_relationship_instance_task(r, operation,
+                                                                          operations_attr)
+                            graph.add_tasks(task)
+            
+            if operation == 'install':
+                create_node_tasks('tosca.interfaces.node.lifecycle.Standard.create')
+                create_node_tasks('tosca.interfaces.node.lifecycle.Standard.configure',
+                                  'tosca.interfaces.relationship.Configure.pre_configure_source',
+                                  'tosca.interfaces.relationship.Configure.pre_configure_target')
+                create_node_tasks('tosca.interfaces.node.lifecycle.Standard.start',
+                                  'tosca.interfaces.relationship.Configure.add_source',
+                                  'tosca.interfaces.relationship.Configure.add_target')
+    
         workflow_context = self.create_workflow_context(deployment_id, initialize_model_storage_fn)
         tasks_graph = cli_workflow(ctx=workflow_context)
         self._engine = Engine(
@@ -56,7 +87,7 @@ class Workflow(object):
         self._engine.execute()
     
     def create_workflow_context(self, deployment_id, initialize_model_storage_fn):
-        model_storage = self.create_sqlite_model_storage()
+        model_storage = self.create_sqlite_model_storage('/tmp/aria.db', True)
         initialize_model_storage_fn(model_storage)
         resource_storage = self.create_fs_resource_storage()
         return WorkflowContext(
@@ -76,15 +107,26 @@ class Workflow(object):
             max_attempts=None,
             retry_interval=None,
             ignore_failure=None)
+
+    def create_relationship_instance_task(self, relationship_instance, operation, end):
+        return OperationTask.relationship_instance(
+            instance=relationship_instance,
+            name=operation,
+            operation_end=end,
+            inputs=None,
+            max_attempts=None,
+            retry_interval=None,
+            ignore_failure=None)
                         
-    def create_sqlite_model_storage(self, path=None):
+    def create_sqlite_model_storage(self, path=None, fresh=False):
         if path is not None:
+            if fresh:
+                os.remove(path)
             path_prefix = '' if 'Windows' in platform.system() else '/'
-            sqlite_engine = create_engine(
-                'sqlite:///%s%s' % (path_prefix, path))
+            sqlite_engine = create_engine('sqlite:///%s%s' % (path_prefix, path))
         else:
             sqlite_engine = create_engine(
-                SQLITE_MEMORY,
+                SQLITE_IN_MEMORY,
                 connect_args={'check_same_thread': False},
                 poolclass=StaticPool)
             

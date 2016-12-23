@@ -26,6 +26,7 @@ import tempfile
 from glob import glob
 from importlib import import_module
 from datetime import datetime
+from threading import RLock
 
 from ruamel import yaml # @UnresolvedImport
 
@@ -60,7 +61,7 @@ from . import csar
 
 class BaseCommand(LoggerMixin):
     """
-    Base class for CLI commands
+    Base class for CLI commands.
     """
 
     def __repr__(self):
@@ -128,6 +129,13 @@ class BaseCommand(LoggerMixin):
 
 
 class ParseCommand(BaseCommand):
+    """
+    :code:`parse` command.
+    
+    Given a blueprint, emits information in human-readable, JSON, or YAML format from various phases
+    of the ARIA parser.
+    """
+    
     def __call__(self, args_namespace, unknown_args):
         super(ParseCommand, self).__call__(args_namespace, unknown_args)
 
@@ -189,81 +197,110 @@ class ParseCommand(BaseCommand):
         return context
 
 
-NODE_OPERATIONS = {
-    'tosca.interfaces.node.lifecycle.Standard.create': {
-        'operation': '%s.default_create' % __name__
-    },
-    'tosca.interfaces.node.lifecycle.Standard.configure': {
-        'operation': '%s.default_configure' % __name__
-    },
-    'tosca.interfaces.node.lifecycle.Standard.start': {
-        'operation': '%s.default_start' % __name__
-    },
-    'tosca.interfaces.node.lifecycle.Standard.stop': {
-        'operation': '%s.default_stop' % __name__
-    },
-    'tosca.interfaces.node.lifecycle.Standard.delete': {
-        'operation': '%s.default_delete' % __name__
-    }
-}
+terminal_lock = RLock()
 
 @operation
-def default_create(ctx, **kwargs):
-    print '>>> create', kwargs
+def node_operation(ctx, **kwargs):
+    with terminal_lock:
+        print '> node instance: %s' % ctx.node_instance.name
 
 @operation
-def default_configure(ctx, **kwargs):
-    print '>>> configure', kwargs
-
-@operation
-def default_start(ctx, **kwargs):
-    print '>>> start', kwargs
-
-@operation
-def default_stop(ctx, **kwargs):
-    print '>>> stop', kwargs
-
-@operation
-def default_delete(ctx, **kwargs):
-    print '>>> delete', kwargs
+def relationship_operation(ctx, **kwargs):
+    with terminal_lock:
+        print '> relationship instance: %s -> %s' % (
+            ctx.relationship_instance.source_node_instance.name,
+            ctx.relationship_instance.target_node_instance.name)
 
 
 class WorkflowCommand(BaseCommand):
+    """
+    :code:`workflow` command.
+    """
+    
     def __call__(self, args_namespace, unknown_args):
         super(WorkflowCommand, self).__call__(args_namespace, unknown_args)
-        operation = '%s.%s' % (args_namespace.interface, args_namespace.operation)
+
+        # Parse
+        context = ConsumptionContext()
+        context.presentation.location = UriLocation(args_namespace.uri)
+        consumer = ConsumerChain(context, (Read, Validate, Model, Inputs, Instance))
+        consumer.consume()
+
+        if context.validation.dump_issues():
+            return
+        
+        # Put model in storage
+        def initialize_model_storage(model_storage):
+            blueprint = self.create_blueprint(context)
+            model_storage.blueprint.put(blueprint)
+            
+            deployment = self.create_deployment(context, blueprint, args_namespace.deployment_id)
+            model_storage.deployment.put(deployment)
+            
+            # Create nodes and node instances
+            for node_template in context.modeling.model.node_templates.itervalues():
+                n = self.create_node(deployment, node_template)
+                model_storage.node.put(n)
+
+                for node in context.modeling.instance.find_nodes(node_template.name):
+                    ni = self.create_node_instance(n, node)
+                    model_storage.node_instance.put(ni)
+            
+            # Create relationships
+            for node_template in context.modeling.model.node_templates.itervalues():
+                for index, requirement_template in enumerate(node_template.requirement_templates):
+                    # We are currently limited only to requirements for specific node templates!
+                    if requirement_template.target_node_template_name:
+                        source = model_storage.node.get_by_name(node_template.name)
+                        target = model_storage.node.get_by_name(
+                            requirement_template.target_node_template_name)
+                        r = self.create_relationship(source, target,
+                                                     requirement_template.relationship_template)
+                        model_storage.relationship.put(r)
+
+                        for node in context.modeling.instance.find_nodes(node_template.name):
+                            for relationship in node.relationships:
+                                if relationship.source_requirement_index == index:
+                                    source_instance = \
+                                        model_storage.node_instance.get_by_name(node.id)
+                                    target_instance = \
+                                        model_storage.node_instance.get_by_name(
+                                            relationship.target_node_id)
+                                    ri = self.create_relationship_instance(r,
+                                                                           source_instance,
+                                                                           target_instance)
+                                    model_storage.relationship_instance.put(ri)
+
+        # Create workflow
         workflow = Workflow(
             args_namespace.deployment_id,
-            self.initialize_model_storage,
-            operation)
+            initialize_model_storage,
+            args_namespace.operation)
+        
+        # Execute
         workflow.execute()
 
-    def initialize_model_storage(self, model_storage):
-        blueprint = self.create_blueprint()    
-        model_storage.blueprint.put(blueprint)
-        deployment = self.create_deployment(blueprint)
-        model_storage.deployment.put(deployment)
-        node = self.create_node(deployment)
-        model_storage.node.put(node)
-        node_instance = self.create_node_instance(node)
-        model_storage.node_instance.put(node_instance)
-
-    def create_blueprint(self):
+    def create_blueprint(self, context):
         now = datetime.utcnow()
+        main_file_name = unicode(context.presentation.location)
+        try:
+            name = context.modeling.model.metadata.values.get('template_name')
+        except AttributeError:
+            name = None
         return model.Blueprint(
             plan={},
-            name='cli_blueprint',
-            description=None,
+            name=name or main_file_name,
+            description=context.modeling.model.description or '',
             created_at=now,
             updated_at=now,
-            main_file_name='main_file_name')
+            main_file_name=main_file_name)
     
-    def create_deployment(self, blueprint):
+    def create_deployment(self, context, blueprint, id):
         now = datetime.utcnow()
         return model.Deployment(
-            name='cli_deployment',
+            name='%s_%s' % (blueprint.name, id),
             blueprint_fk=blueprint.id,
-            description='',
+            description=context.modeling.instance.description or '',
             created_at=now,
             updated_at=now,
             workflows={},
@@ -275,33 +312,73 @@ class WorkflowCommand(BaseCommand):
             outputs={},
             scaling_groups={})
 
-    def create_node(self, deployment):
+    def create_node(self, deployment, node_template):
+        operations = self.create_operations(node_template.interface_templates, 'node_operation')
         return model.Node(
-            name='host',
-            type='test_node_type',
+            name=node_template.name,
+            type=node_template.type_name,
             type_hierarchy=[],
-            number_of_instances=1,
-            planned_number_of_instances=1,
-            deploy_number_of_instances=1,
+            number_of_instances=node_template.default_instances,
+            planned_number_of_instances=node_template.default_instances,
+            deploy_number_of_instances=node_template.default_instances,
             properties={},
-            operations=NODE_OPERATIONS,
-            min_number_of_instances=1,
-            max_number_of_instances=1,
+            operations=operations,
+            min_number_of_instances=node_template.min_instances,
+            max_number_of_instances=node_template.max_instances or 100,
             deployment_fk=deployment.id)
+
+    def create_relationship(self, source, target, relationship_template):
+        if relationship_template:
+            source_operations = \
+                self.create_operations(relationship_template.source_interface_templates,
+                                       'relationship_operation')
+            target_operations = \
+                self.create_operations(relationship_template.target_interface_templates,
+                                       'relationship_operation')
+        else:
+            source_operations = {}
+            target_operations = {}
+        return model.Relationship(
+            source_node_fk=source.id,
+            target_node_fk=target.id,
+            source_interfaces={},
+            source_operations=source_operations,
+            target_interfaces={},
+            target_operations=target_operations,
+            type='rel_type',
+            type_hierarchy=[],
+            properties={})
     
-    def create_node_instance(self, node):
+    def create_node_instance(self, n, node):
         return model.NodeInstance(
-            name='host_instance',
+            name=node.id,
             runtime_properties={},
             version=None,
-            node_fk=node.id,
+            node_fk=n.id,
             state='',
             scaling_groups=[])
+
+    def create_relationship_instance(self, relationship, source_instance, target_instance):
+        return model.RelationshipInstance(
+            relationship_fk=relationship.id,
+            source_node_instance_fk=source_instance.id,
+            target_node_instance_fk=target_instance.id)
+
+    def create_operations(self, interfaces, fn_name):
+        operations = {}
+        for interface in interfaces.itervalues():
+            operations[interface.type_name] = {} 
+            for operation in interface.operation_templates.itervalues():
+                n = '%s.%s' % (interface.type_name, operation.name)
+                operations[n] = {'operation': '%s.%s' % (__name__, fn_name)}
+        return operations
    
 
 class InitCommand(BaseCommand):
     """
-    ``init`` command implementation
+    :code:`init` command.
+    
+    Broken. Currently maintained for reference.
     """
 
     _IN_VIRTUAL_ENV = hasattr(sys, 'real_prefix')
@@ -379,7 +456,9 @@ class InitCommand(BaseCommand):
 
 class ExecuteCommand(BaseCommand):
     """
-    ``execute`` command implementation
+    :code:`execute` command.
+
+    Broken. Currently maintained for reference.
     """
 
     def __call__(self, args_namespace, unknown_args):
@@ -536,6 +615,12 @@ class CSARValidateCommand(BaseCSARCommand):
 
 
 class SpecCommand(BaseCommand):
+    """
+    :code:`spec` command.
+    
+    Emits all uses of :code:`@dsl_specification` in the codebase, in human-readable or CSV format.
+    """
+    
     def __call__(self, args_namespace, unknown_args):
         super(SpecCommand, self).__call__(args_namespace, unknown_args)
 

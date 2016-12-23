@@ -137,13 +137,9 @@ def add_workflow_parser(workflow):
         required=True,
         help='A unique ID for the deployment')
     workflow.add_argument(
-        '-i', '--interface',
-        default='tosca.interfaces.node.lifecycle.Standard',
-        help='The TOSCA interface base type')
-    workflow.add_argument(
         '-o', '--operation',
-        default='create',
-        help='The TOSCA interface operation name')
+        default='install',
+        help='The lifecycle operation')
 
 
 @sub_parser_decorator(

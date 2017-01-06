@@ -17,9 +17,8 @@
 Builtin execute_operation workflow
 """
 
-from aria import workflow
-
-from .workflows import execute_operation_on_instance
+from ... import workflow
+from .utils import create_node_instance_task_explicit
 
 
 @workflow
@@ -68,7 +67,7 @@ def execute_operation(
     # registering actual tasks to sequences
     for node_instance in filtered_node_instances:
         graph.add_tasks(
-            execute_operation_on_instance(
+            create_node_instance_task_explicit(
                 node_instance=node_instance,
                 operation=operation,
                 operation_kwargs=operation_kwargs,

@@ -29,7 +29,7 @@ def ctx(tmpdir):
     storage.release_sqlite_storage(context.model)
 
 
-def test_execute_operation(ctx):
+def _test_execute_operation(ctx):
     node_instance = ctx.model.node_instance.get_by_name(mock.models.DEPENDENCY_NODE_INSTANCE_NAME)
 
     operation_name = mock.operations.NODE_OPERATIONS_INSTALL[0]

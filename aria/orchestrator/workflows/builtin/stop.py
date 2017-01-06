@@ -12,14 +12,17 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""
-Aria orchestrator
-"""
-from .decorators import workflow, operation, WORKFLOW_DECORATOR_RESERVED_ARGUMENTS
 
-from . import (
-    context,
-    events,
-    workflows,
-    decorators
-)
+"""
+Builtin stop workflow
+"""
+
+from .workflows import stop_node_instance
+from ..api.task import WorkflowTask
+from ... import workflow
+
+
+@workflow
+def stop(ctx, graph):
+    for node_instance in ctx.model.node_instance.iter():
+        graph.add_tasks(WorkflowTask(stop_node_instance, node_instance=node_instance))

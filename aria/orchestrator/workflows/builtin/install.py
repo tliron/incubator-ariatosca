@@ -17,38 +17,18 @@
 Builtin install workflow
 """
 
-from aria import workflow
-
 from .workflows import install_node_instance
-from ..api import task
+from .utils import create_node_instance_task_dependencies
+from ..api.task import WorkflowTask
+from ... import workflow
 
 
 @workflow
-def install(ctx, graph, node_instances=(), node_instance_sub_workflows=None):
-    """
-    The install workflow
-    :param WorkflowContext ctx: the workflow context
-    :param TaskGraph graph: the graph which will describe the workflow.
-    :param node_instances: the node instances on which to run the workflow
-    :param dict node_instance_sub_workflows: a dictionary of subworkflows  with id as key and
-    TaskGraph (or OperationContext) as value
-    :return:
-    """
-    node_instance_sub_workflows = node_instance_sub_workflows or {}
-    node_instances = node_instances or list(ctx.node_instances)
-
-    # create install sub workflow for every node instance
-    for node_instance in node_instances:
-        node_instance_sub_workflow = task.WorkflowTask(install_node_instance,
-                                                       node_instance=node_instance)
-        node_instance_sub_workflows[node_instance.id] = node_instance_sub_workflow
-        graph.add_tasks(node_instance_sub_workflow)
-
-    # create dependencies between the node instance sub workflow
-    for node_instance in node_instances:
-        node_instance_sub_workflow = node_instance_sub_workflows[node_instance.id]
-        if node_instance.outbound_relationship_instances:
-            dependencies = [
-                node_instance_sub_workflows[relationship_instance.target_node_instance.id]
-                for relationship_instance in node_instance.outbound_relationship_instances]
-            graph.add_dependency(node_instance_sub_workflow, dependencies)
+def install(ctx, graph):
+    node_instances = []
+    tasks = []
+    for node_instance in ctx.model.node_instance.iter():
+        node_instances.append(node_instance)
+        tasks.append(WorkflowTask(install_node_instance, node_instance=node_instance))
+    graph.add_tasks(tasks)
+    create_node_instance_task_dependencies(graph, node_instances, tasks)

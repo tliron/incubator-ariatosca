@@ -31,6 +31,7 @@ def ctx(tmpdir):
     storage.release_sqlite_storage(context.model)
 
 
+@pytest.mark.skip(reason='heal is not implemented for now')
 def test_heal_dependent_node(ctx):
     dependent_node_instance = \
         ctx.model.node_instance.get_by_name(mock.models.DEPENDENT_NODE_INSTANCE_NAME)

@@ -1,0 +1,55 @@
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.
+# The ASF licenses this file to You under the Apache License, Version 2.0
+# (the "License"); you may not use this file except in compliance with
+# the License.  You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+import pytest
+from jinja2 import Template
+
+
+class Parsed(object):
+    def __init__(self):
+        self.issues = []
+        self.text = ''
+
+    def assert_success(self):
+        __tracebackhide__ = True # pylint: disable=unused-variable
+        if len(self.issues) > 0:
+            pytest.fail(u'did not expect parsing errors\n\n{0}\n\n{1}'
+                        .format(self.text.strip(), u'\n'.join(self.issues)))
+
+    def assert_failure(self):
+        __tracebackhide__ = True # pylint: disable=unused-variable
+        if len(self.issues) > 0:
+            pass
+        else:
+            pytest.fail(u'expected parsing errors but got none\n\n{0}'
+                        .format(self.text.strip()))
+
+
+class Parser(object):
+    def parse_literal(self, text, context=None):
+        text = render(text, context)
+        return self._parse_literal(text)
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        pass
+
+
+def render(template, context=None):
+    template = Template(template)
+    template = template.render(context or {})
+    return template

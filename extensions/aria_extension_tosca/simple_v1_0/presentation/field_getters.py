@@ -14,6 +14,7 @@
 # limitations under the License.
 
 from aria.utils.formatting import safe_repr
+from aria.utils.type import full_type_name
 from aria.parser.exceptions import InvalidValueError
 
 
@@ -31,7 +32,8 @@ def data_type_class_getter(cls):
                 return cls(None, None, raw, None)
             except ValueError as e:
                 raise InvalidValueError(
-                    '%s is not a valid "%s" in "%s": %s'
-                    % (field.full_name, field.full_cls_name, presentation._name, safe_repr(raw)),
+                    '{0} is not a valid "{1}" in "{2}": {3}'
+                    .format(field.full_name, full_type_name(cls), presentation._name,
+                            safe_repr(raw)),
                     cause=e, locator=field.get_locator(raw))
     return getter

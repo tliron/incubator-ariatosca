@@ -22,7 +22,8 @@ ARIA modeling service common module
 from sqlalchemy import (
     Column,
     Text,
-    Boolean
+    Boolean,
+    PickleType
 )
 from sqlalchemy.ext.declarative import declared_attr
 
@@ -587,12 +588,11 @@ class MetadataBase(TemplateModelMixin):
     :ivar name: name
     :vartype name: basestring
     :ivar value: value
-    :vartype value: basestring
     """
 
     __tablename__ = 'metadata'
 
-    value = Column(Text)
+    value = Column(PickleType)
 
     @property
     def as_raw(self):

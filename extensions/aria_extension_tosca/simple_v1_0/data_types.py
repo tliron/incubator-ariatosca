@@ -41,7 +41,7 @@ class Timezone(tzinfo):
         return self._offset
 
     def tzname(self, dt): # pylint: disable=unused-argument
-        return str(self._offset)
+        return unicode(self._offset)
 
     def dst(self, dt): # pylint: disable=unused-argument
         return Timezone._ZERO
@@ -75,7 +75,7 @@ class Timestamp(object):
     CANONICAL = '%Y-%m-%dT%H:%M:%S'
 
     def __init__(self, entry_schema, constraints, value, aspect): # pylint: disable=unused-argument
-        value = str(value)
+        value = unicode(value)
         match = re.match(Timestamp.REGULAR_SHORT, value)
         if match is not None:
             # Parse short form
@@ -116,8 +116,8 @@ class Timestamp(object):
                                       Timezone(tzhour, tzminute))
             else:
                 raise ValueError(
-                    'timestamp must be formatted as YAML ISO8601 variant or "YYYY-MM-DD": %s'
-                    % safe_repr(value))
+                    'timestamp must be formatted as YAML ISO8601 variant or "YYYY-MM-DD": {0}'
+                    .format(safe_repr(value)))
 
     @property
     def as_datetime_utc(self):
@@ -129,8 +129,8 @@ class Timestamp(object):
 
     def __str__(self):
         the_datetime = self.as_datetime_utc
-        return '%s%sZ' \
-            % (the_datetime.strftime(Timestamp.CANONICAL), Timestamp._fraction_as_str(the_datetime))
+        return '{0}{1}Z'.format(the_datetime.strftime(Timestamp.CANONICAL),
+                                Timestamp._fraction_as_str(the_datetime))
 
     def __repr__(self):
         return repr(self.__str__())
@@ -165,7 +165,7 @@ class Version(object):
 
     REGEX = \
         r'^(?P<major>\d+)\.(?P<minor>\d+)(\.(?P<fix>\d+)' + \
-        r'((\.(?P<qualifier>\d+))(\-(?P<build>\d+))?)?)?$'
+        r'((\.(?P<qualifier>\w+))(\-(?P<build>\d+))?)?)?$'
 
     @staticmethod
     def key(version):
@@ -175,13 +175,12 @@ class Version(object):
         return (version.major, version.minor, version.fix, version.qualifier, version.build)
 
     def __init__(self, entry_schema, constraints, value, aspect): # pylint: disable=unused-argument
-        str_value = str(value)
-        match = re.match(Version.REGEX, str_value)
+        str_value = unicode(value)
+        match = re.match(Version.REGULAR, str_value, flags=re.UNICODE)
         if match is None:
             raise ValueError(
                 'version must be formatted as <major_version>.<minor_version>'
-                '[.<fix_version>[.<qualifier>[-<build_version]]]: %s'
-                % safe_repr(value))
+                '[.<fix_version>[.<qualifier>[-<build_version]]]: {0}'.format(safe_repr(value)))
 
         self.value = str_value
 
@@ -193,8 +192,6 @@ class Version(object):
         if self.fix is not None:
             self.fix = int(self.fix)
         self.qualifier = match.group('qualifier')
-        if self.qualifier is not None:
-            self.qualifier = int(self.qualifier)
         self.build = match.group('build')
         if self.build is not None:
             self.build = int(self.build)
@@ -215,6 +212,7 @@ class Version(object):
         return (self.major, self.minor, self.fix, self.qualifier, self.build) == \
             (version.major, version.minor, version.fix, version.qualifier, version.build)
 
+    @implements_specification('3.2.2.1', 'tosca-simple-1.0')
     def __lt__(self, version):
         if self.major < version.major:
             return True
@@ -225,9 +223,7 @@ class Version(object):
                 if self.fix < version.fix:
                     return True
                 elif self.fix == version.fix:
-                    if self.qualifier < version.qualifier:
-                        return True
-                    elif self.qualifier == version.qualifier:
+                    if self.qualifier == version.qualifier:
                         if self.build < version.build:
                             return True
         return False
@@ -246,26 +242,27 @@ class Range(object):
 
     def __init__(self, entry_schema, constraints, value, aspect): # pylint: disable=unused-argument
         if not isinstance(value, list):
-            raise ValueError('range value is not a list: %s' % safe_repr(value))
+            raise ValueError('range value is not a list: {0}'.format(safe_repr(value)))
         if len(value) != 2:
-            raise ValueError('range value does not have exactly 2 elements: %s' % safe_repr(value))
+            raise ValueError('range value does not have exactly 2 elements: {0}'
+                             .format(safe_repr(value)))
 
         def is_int(v):
             return isinstance(v, int) and (not isinstance(v, bool)) # In Python bool is an int
 
         if not is_int(value[0]):
-            raise ValueError('lower bound of range is not a valid integer: %s'
-                             % safe_repr(value[0]))
+            raise ValueError('lower bound of range is not a valid integer: {0}'
+                             .format(safe_repr(value[0])))
 
         if value[1] != 'UNBOUNDED':
             if not is_int(value[1]):
-                raise ValueError('upper bound of range is not a valid integer or "UNBOUNDED": %s'
-                                 % safe_repr(value[0]))
+                raise ValueError('upper bound of range is not a valid integer or "UNBOUNDED": {0}'
+                                 .format(safe_repr(value[0])))
 
             if value[0] >= value[1]:
                 raise ValueError(
-                    'upper bound of range is not greater than the lower bound: %s >= %s'
-                    % (safe_repr(value[0]), safe_repr(value[1])))
+                    'upper bound of range is not greater than the lower bound: {0} >= {1}'
+                    .format(safe_repr(value[0]), safe_repr(value[1])))
 
         self.value = value
 
@@ -296,7 +293,7 @@ class List(list):
     @staticmethod
     def _create(context, presentation, entry_schema, constraints, value, aspect): # pylint: disable=unused-argument
         if not isinstance(value, list):
-            raise ValueError('"list" data type value is not a list: %s' % safe_repr(value))
+            raise ValueError('"list" data type value is not a list: {0}'.format(safe_repr(value)))
 
         entry_schema_type = entry_schema._get_type(context)
         entry_schema_constraints = entry_schema.constraints
@@ -330,7 +327,7 @@ class Map(StrictDict):
     @staticmethod
     def _create(context, presentation, entry_schema, constraints, value, aspect): # pylint: disable=unused-argument
         if not isinstance(value, dict):
-            raise ValueError('"map" data type value is not a dict: %s' % safe_repr(value))
+            raise ValueError('"map" data type value is not a dict: {0}'.format(safe_repr(value)))
 
         if entry_schema is None:
             raise ValueError('"map" data type does not define "entry_schema"')
@@ -375,14 +372,15 @@ class Scalar(object):
         return scalar.value
 
     def __init__(self, entry_schema, constraints, value, aspect): # pylint: disable=unused-argument
-        str_value = str(value)
-        match = re.match(self.REGEX, str_value) # pylint: disable=no-member
+        str_value = unicode(value)
+        match = re.match(self.REGULAR, str_value, flags=re.UNICODE) # pylint: disable=no-member
         if match is None:
-            raise ValueError('scalar must be formatted as <scalar> <unit>: %s' % safe_repr(value))
+            raise ValueError('scalar must be formatted as <scalar> <unit>: {0}'
+                             .format(safe_repr(value)))
 
         self.factor = float(match.group('scalar'))
         if self.factor < 0:
-            raise ValueError('scalar is negative: %s' % safe_repr(self.factor))
+            raise ValueError('scalar is negative: {0}'.format(safe_repr(self.factor)))
 
         self.unit = match.group('unit')
 
@@ -394,7 +392,8 @@ class Scalar(object):
                 unit_size = v
                 break
         if unit_size is None:
-            raise ValueError('scalar specified with unsupported unit: %s' % safe_repr(self.unit))
+            raise ValueError('scalar specified with unsupported unit: {0}'
+                             .format(safe_repr(self.unit)))
 
         self.value = self.TYPE(self.factor * unit_size) # pylint: disable=no-member
 
@@ -407,7 +406,7 @@ class Scalar(object):
             ('unit_size', self.UNITS[self.unit]))) # pylint: disable=no-member
 
     def __str__(self):
-        return '%s %s' % (self.value, self.UNIT) # pylint: disable=no-member
+        return '{0} {1}'.format(self.value, self.UNIT) # pylint: disable=no-member
 
     def __repr__(self):
         return repr(self.__str__())

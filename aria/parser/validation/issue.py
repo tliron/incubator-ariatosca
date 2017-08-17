@@ -66,9 +66,9 @@ class Issue(object):
     def __init__(self, message=None, exception=None, location=None, line=None,
                  column=None, locator=None, snippet=None, level=0):
         if message is not None:
-            self.message = str(message)
+            self.message = unicode(message)
         elif exception is not None:
-            self.message = str(exception)
+            self.message = unicode(exception)
         else:
             self.message = 'unknown issue'
 

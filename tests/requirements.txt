@@ -13,6 +13,7 @@
 testtools==2.3.0
 fasteners==0.14.1
 sh==1.12.14
+tornado==4.3 # last release to support Python 2.6
 psutil==5.2.2
 mock==2.0.0
 pylint==1.6.5

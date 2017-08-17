@@ -20,14 +20,16 @@ from aria.parser import implements_specification
 from aria.parser.presentation import (AsIsPresentation, has_fields, allow_unknown_fields,
                                       short_form_field, primitive_field, primitive_list_field,
                                       primitive_dict_unknown_fields, object_field,
-                                      object_list_field, object_dict_field, field_validator,
-                                      type_validator)
+                                      object_list_field, object_dict_field, field_getter,
+                                      field_validator, type_validator)
 
+from .data_types import Version
 from .modeling.data_types import (get_data_type, get_data_type_value, get_property_constraints,
                                   apply_constraint_to_value)
 from .modeling.substitution_mappings import (validate_substitution_mappings_requirement,
                                              validate_substitution_mappings_capability)
 from .presentation.extensible import ExtensiblePresentation
+from .presentation.field_getters import data_type_class_getter
 from .presentation.field_validators import (constraint_clause_field_validator,
                                             constraint_clause_in_range_validator,
                                             constraint_clause_valid_values_validator,
@@ -79,6 +81,7 @@ class MetaData(ExtensiblePresentation):
         as a single-line string value.
         """
 
+    @field_getter(data_type_class_getter(Version))
     @primitive_field(str)
     @implements_specification('3.9.3.5', 'tosca-simple-1.0')
     def template_version(self):
@@ -87,7 +90,7 @@ class MetaData(ExtensiblePresentation):
         service template as a single-line string value.
         """
 
-    @primitive_dict_unknown_fields()
+    @primitive_dict_unknown_fields(str)
     def custom(self):
         """
         :type: dict

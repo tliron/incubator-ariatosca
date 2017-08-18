@@ -70,7 +70,7 @@ class ArtifactType(ExtensiblePresentation):
         """
 
     @field_getter(data_type_class_getter(Version))
-    @primitive_field()
+    @primitive_field(str)
     def version(self):
         """
         An optional version for the Artifact Type definition.
@@ -153,7 +153,8 @@ class DataType(ExtensiblePresentation):
         :type: :obj:`basestring`
         """
 
-    @object_field(Version)
+    @field_getter(data_type_class_getter(Version))
+    @primitive_field(str)
     def version(self):
         """
         An optional version for the Data Type definition.
@@ -261,7 +262,8 @@ class CapabilityType(ExtensiblePresentation):
         :type: :obj:`basestring`
         """
 
-    @object_field(Version)
+    @field_getter(data_type_class_getter(Version))
+    @primitive_field(str)
     def version(self):
         """
         An optional version for the Capability Type definition.
@@ -363,7 +365,8 @@ class InterfaceType(ExtensiblePresentation):
         :type: :obj:`basestring`
         """
 
-    @object_field(Version)
+    @field_getter(data_type_class_getter(Version))
+    @primitive_field(str)
     def version(self):
         """
         An optional version for the Interface Type definition.
@@ -450,7 +453,8 @@ class RelationshipType(ExtensiblePresentation):
         :type: :obj:`basestring`
         """
 
-    @object_field(Version)
+    @field_getter(data_type_class_getter(Version))
+    @primitive_field(str)
     def version(self):
         """
         An optional version for the Relationship Type definition.
@@ -565,7 +569,8 @@ class NodeType(ExtensiblePresentation):
         :type: :obj:`basestring`
         """
 
-    @object_field(Version)
+    @field_getter(data_type_class_getter(Version))
+    @primitive_field(str)
     def version(self):
         """
         An optional version for the Node Type definition.
@@ -721,7 +726,8 @@ class GroupType(ExtensiblePresentation):
         :type: :obj:`basestring`
         """
 
-    @object_field(Version)
+    @field_getter(data_type_class_getter(Version))
+    @primitive_field(str)
     def version(self):
         """
         An optional version for the Group Type definition.
@@ -827,7 +833,8 @@ class PolicyType(ExtensiblePresentation):
         :type: :obj:`basestring`
         """
 
-    @object_field(Version)
+    @field_getter(data_type_class_getter(Version))
+    @primitive_field(str)
     def version(self):
         """
         An optional version for the Policy Type definition.

@@ -19,6 +19,7 @@ import threading
 import tornado.web
 import tornado.ioloop
 import tornado.netutil
+import tornado.httpserver
 
 
 logging.getLogger('tornado.access').disabled = True
@@ -43,7 +44,7 @@ class WebServer(threading.Thread):
     def root(self):
         return 'http://localhost:{0}'.format(self.port)
 
-    def add_text(self, url, content, content_type):
+    def add_text(self, url, content, content_type='text/plain'):
         self.content.append((url, TextHandler, dict(content=content, content_type=content_type)))
 
     def add_text_yaml(self, url, content):
@@ -64,6 +65,14 @@ class WebServer(threading.Thread):
     @staticmethod
     def escape(segment):
         return tornado.escape.url_escape(segment)
+
+    def __enter__(self):
+        self.start()
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        self.stop()
+
 
 class TextHandler(tornado.web.RequestHandler):
     def initialize(self, content, content_type): # pylint: disable=arguments-differ

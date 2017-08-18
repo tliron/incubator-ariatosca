@@ -24,7 +24,7 @@ _INF = float('inf')
 
 _NULL = (), _INF
 
-_DIGITS_RE = re.compile(r'^\d+$')
+_DIGITS_RE = re.compile(r'^\d+$', flags=re.UNICODE)
 
 _PREFIXES = {
     'dev':   0.0001,

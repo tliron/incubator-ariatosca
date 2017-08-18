@@ -734,7 +734,7 @@ class Field(object):
                             primitive_dict[k] = self._coerce_primitive(v, context)
                         except ValueError as e:
                             raise InvalidValueError('%s is not a dict of "%s" values:'
-                                                    ' entry "%d" is %s'
+                                                    ' entry "%s" is %s'
                                                     % (self.full_name, self.full_cls_name,
                                                        k, safe_repr(v)),
                                                     locator=self.get_locator(raw),

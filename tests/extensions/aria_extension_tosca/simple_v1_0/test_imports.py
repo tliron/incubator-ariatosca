@@ -16,8 +16,11 @@
 
 import pytest
 
+from . import data
 from ....mechanisms.web_server import WebServer
 
+
+# Fixtures
 
 NODE_TYPE_IMPORT = """
 node_types:
@@ -35,17 +38,16 @@ node_types:
 def repository():
     repository = WebServer()
     repository.add_text_yaml('/imports/node-type.yaml', NODE_TYPE_IMPORT)
-    repository.add_text_yaml('/imports/{0}.yaml'.format(WebServer.escape('詠嘆調')),
+    repository.add_text_yaml('/imports/{0}.yaml'.format(WebServer.escape('節點類型')),
                              NODE_TYPE_IMPORT)
     repository.add_text_yaml('/imports/bad.yaml', BAD_IMPORT)
-    repository.start()
-    yield repository.root
-    repository.stop()
+    with repository:
+        yield repository.root
 
 
 # Syntax
 
-@pytest.mark.parametrize('value', ('null', 'a_string', '123', '0.123', '{}'))
+@pytest.mark.parametrize('value', data.NOT_A_LIST)
 def test_imports_wrong_yaml_type(parser, value):
     parser.parse_literal("""
 tosca_definitions_version: tosca_simple_yaml_1_0
@@ -53,7 +55,7 @@ imports: {{ value }}
 """, dict(value=value)).assert_failure()
 
 
-def test_imports_empty_list(parser):
+def test_imports_empty(parser):
     parser.parse_literal("""
 tosca_definitions_version: tosca_simple_yaml_1_0
 imports: []
@@ -75,10 +77,10 @@ topology_template:
 
 
 def test_import_single_short_form_unicode(parser, repository):
-    parser.parse_literal(u"""
+    parser.parse_literal("""
 tosca_definitions_version: tosca_simple_yaml_1_0
 imports:
-  - {{ repository }}/imports/詠嘆調.yaml
+  - {{ repository }}/imports/節點類型.yaml
 topology_template:
   node_templates:
     my_node:

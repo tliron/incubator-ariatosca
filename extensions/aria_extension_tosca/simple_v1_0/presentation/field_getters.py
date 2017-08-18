@@ -16,6 +16,7 @@
 from aria.utils.formatting import safe_repr
 from aria.utils.type import full_type_name
 from aria.parser.exceptions import InvalidValueError
+from aria.parser.presentation import NULL
 
 
 def data_type_class_getter(cls):
@@ -27,13 +28,14 @@ def data_type_class_getter(cls):
 
     def getter(field, presentation, context=None):
         raw = field.default_get(presentation, context)
-        if raw is not None:
-            try:
-                return cls(None, None, raw, None)
-            except ValueError as e:
-                raise InvalidValueError(
-                    '{0} is not a valid "{1}" in "{2}": {3}'
-                    .format(field.full_name, full_type_name(cls), presentation._name,
-                            safe_repr(raw)),
-                    cause=e, locator=field.get_locator(raw))
+        if (raw is None) or (raw is NULL):
+            return raw
+        try:
+            return cls(None, None, raw, None)
+        except ValueError as e:
+            raise InvalidValueError(
+                '{0} is not a valid "{1}" in "{2}": {3}'
+                .format(field.full_name, full_type_name(cls), presentation._name,
+                        safe_repr(raw)),
+                cause=e, locator=field.get_locator(raw))
     return getter

@@ -14,8 +14,8 @@
 # limitations under the License.
 
 
-from ...utils.threading import FixedThreadPoolExecutor
-from ...utils.formatting import json_dumps, yaml_dumps
+from ...utils.threading import (BlockingExecutor, FixedThreadPoolExecutor)
+from ...utils.formatting import (json_dumps, yaml_dumps)
 from ..loading import UriLocation
 from ..reading import AlreadyReadException
 from ..presentation import PresenterNotFoundError
@@ -47,9 +47,14 @@ class Read(Consumer):
         presenter = None
         imported_presentations = None
 
-        executor = FixedThreadPoolExecutor(size=self.context.presentation.threads,
-                                           timeout=self.context.presentation.timeout)
-        executor.print_exceptions = self.context.presentation.print_exceptions
+        if self.context.presentation.threads == 1:
+            executor = BlockingExecutor(print_exceptions=self.context.presentation.print_exceptions)
+        else:
+            executor = FixedThreadPoolExecutor(size=self.context.presentation.threads,
+                                               timeout=self.context.presentation.timeout,
+                                               print_exceptions=self.context.presentation \
+                                               .print_exceptions)
+
         try:
             presenter = self._present(self.context.presentation.location, None, None, executor)
             executor.drain()

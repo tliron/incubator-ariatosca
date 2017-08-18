@@ -13,16 +13,31 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+"""
+PyTest configuration module.
+"""
+
 import pytest
 
 from ....mechanisms.parsing.aria import AriaParser
 
 
+def pytest_addoption(parser):
+    parser.addoption('--tosca-parser', action='store', default='aria', help='TOSCA parser')
+
+
 def pytest_report_header(config):
-    return 'parser: ARIA'
+    tosca_parser = config.getoption('--tosca-parser')
+    return 'tosca-parser: {0}'.format(tosca_parser)
 
 
 @pytest.fixture(scope='session')
-def parser():
-    with AriaParser() as p:
-        yield p
+def parser(request):
+    tosca_parser = request.config.getoption('--tosca-parser')
+    verbose = request.config.getoption('verbose') > 0
+    if tosca_parser == 'aria':
+        with AriaParser() as p:
+            p.verbose = verbose
+            yield p
+    else:
+        pytest.fail('configured tosca-parser not supported: {0}'.format(tosca_parser))

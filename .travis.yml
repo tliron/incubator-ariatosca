@@ -13,7 +13,6 @@
 # We need to set "sudo: true" in order to use a virtual machine instead of a container, because
 # SSH tests fail in the container. See:
 # https://docs.travis-ci.com/user/reference/overview/#Virtualization-environments
-
 dist: trusty
 sudo: true
 
@@ -45,6 +44,8 @@ env:
   - PYTEST_PROCESSES=1 TOX_ENV=py26
   - PYTEST_PROCESSES=1 TOX_ENV=py27e2e
   - PYTEST_PROCESSES=1 TOX_ENV=py26e2e
+  - PYTEST_PROCESSES=1 TOX_ENV=py27extensions
+  - PYTEST_PROCESSES=1 TOX_ENV=py26extensions
   - PYTEST_PROCESSES=1 TOX_ENV=py27ssh
   - PYTEST_PROCESSES=1 TOX_ENV=py26ssh
   - PYTEST_PROCESSES=1 TOX_ENV=docs

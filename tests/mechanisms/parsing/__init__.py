@@ -14,33 +14,51 @@
 # limitations under the License.
 
 import pytest
-from jinja2 import Template
+import jinja2
+
+
+LINE_BREAK = '\n' + '-' * 60
 
 
 class Parsed(object):
     def __init__(self):
         self.issues = []
         self.text = ''
+        self.verbose = False
 
     def assert_success(self):
         __tracebackhide__ = True # pylint: disable=unused-variable
         if len(self.issues) > 0:
             pytest.fail(u'did not expect parsing errors\n\n{0}\n\n{1}'
                         .format(self.text.strip(), u'\n'.join(self.issues)))
+        else:
+            if self.verbose:
+                print LINE_BREAK
+                print self.text.strip()
 
     def assert_failure(self):
         __tracebackhide__ = True # pylint: disable=unused-variable
         if len(self.issues) > 0:
-            pass
+            if self.verbose:
+                print LINE_BREAK
+                print u'{0}\n\n{1}'.format(self.text.strip(), u'\n'.join(self.issues))
         else:
             pytest.fail(u'expected parsing errors but got none\n\n{0}'
                         .format(self.text.strip()))
 
 
 class Parser(object):
+    def __init__(self):
+        self.verbose = False
+
     def parse_literal(self, text, context=None):
         text = render(text, context)
-        return self._parse_literal(text)
+        parsed = self._parse_literal(text)
+        parsed.verbose = self.verbose
+        return parsed
+
+    def _parse_literal(self, text):
+        raise NotImplementedError
 
     def __enter__(self):
         return self
@@ -50,6 +68,8 @@ class Parser(object):
 
 
 def render(template, context=None):
-    template = Template(template)
+    if not isinstance(template, unicode):
+        template = template.decode('utf-8')
+    template = jinja2.Template(template)
     template = template.render(context or {})
     return template

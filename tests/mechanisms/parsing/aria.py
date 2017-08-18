@@ -25,7 +25,7 @@ from aria.parser.consumption import (
 )
 from aria.utils.imports import import_fullname
 
-from . import Parser, Parsed
+from . import (Parser, Parsed)
 
 
 class AriaParser(Parser):
@@ -51,6 +51,7 @@ class AriaParser(Parser):
         context.reading.reader_source = import_fullname(reader_source)()
         context.presentation.presenter_source = import_fullname(presenter_source)()
         context.presentation.presenter_class = import_fullname(presenter)
+        context.presentation.threads = 1 # tests already run in maximum thread density
         context.presentation.print_exceptions = debug
         return context
 

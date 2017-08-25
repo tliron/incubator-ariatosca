@@ -15,6 +15,8 @@
 
 """
 PyTest configuration module.
+
+Add support for a "--tosca-parser" CLI option.
 """
 
 import pytest

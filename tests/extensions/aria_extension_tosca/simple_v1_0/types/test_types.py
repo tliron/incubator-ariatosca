@@ -18,7 +18,7 @@ import itertools
 
 import pytest
 
-from . import data
+from .. import data
 
 
 # Syntax
@@ -55,7 +55,6 @@ tosca_definitions_version: tosca_simple_yaml_1_0
   MyType:
     derived_from: {{ value }}
 """, dict(name=name, value=value)).assert_failure()
-
 
 
 # Derivation

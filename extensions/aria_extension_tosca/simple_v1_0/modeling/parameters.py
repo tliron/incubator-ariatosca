@@ -148,10 +148,10 @@ def validate_required_values(context, presentation, values, definitions):
     if not definitions:
         return
     for name, definition in definitions.iteritems():
-        if getattr(definition, 'required', False) and \
-            ((values is None) or (values.get(name) is None)):
-            context.validation.report('required property "%s" is not assigned a value in "%s"'
-                                      % (name, presentation._fullname),
+        if getattr(definition, 'required', False) \
+            and ((values is None) or (values.get(name) is None)):
+            context.validation.report('required property "{0}" is not assigned a value in "{1}"'
+                                      .format(name, presentation._fullname),
                                       locator=presentation._get_child_locator('properties'),
                                       level=Issue.BETWEEN_TYPES)
 

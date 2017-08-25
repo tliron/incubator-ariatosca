@@ -283,7 +283,7 @@ class InterfaceDefinition(ExtensiblePresentation):
 
     @field_validator(type_validator('interface type', convert_name_to_full_type_name,
                                     'interface_types'))
-    @primitive_field(str)
+    @primitive_field(str, required=True)
     def type(self):
         """
         ARIA NOTE: This field is not mentioned in the spec, but is implied.

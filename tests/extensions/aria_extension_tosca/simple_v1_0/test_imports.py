@@ -28,6 +28,12 @@ node_types:
     derived_from: tosca.nodes.Root
 """
 
+NODE_TYPE_IMPORT_UNICODE = """
+node_types:
+  類型:
+    derived_from: tosca.nodes.Root
+"""
+
 BAD_IMPORT = """
 node_types:
   MyNode:
@@ -39,7 +45,7 @@ def repository():
     repository = WebServer()
     repository.add_text_yaml('/imports/node-type.yaml', NODE_TYPE_IMPORT)
     repository.add_text_yaml('/imports/{0}.yaml'.format(WebServer.escape('節點類型')),
-                             NODE_TYPE_IMPORT)
+                             NODE_TYPE_IMPORT_UNICODE)
     repository.add_text_yaml('/imports/bad.yaml', BAD_IMPORT)
     with repository:
         yield repository.root
@@ -84,7 +90,7 @@ imports:
 topology_template:
   node_templates:
     my_node:
-      type: MyNode
+      type: 類型
 """, dict(repository=repository)).assert_success()
 
 

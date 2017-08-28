@@ -26,6 +26,7 @@ SECTIONS = (
     ('data', 'properties'),
     ('capability', 'properties'),
     ('capability', 'attributes'),
+    ('interface', 'inputs'),
     ('relationship', 'properties'),
     ('relationship', 'attributes'),
     ('node', 'properties'),
@@ -63,6 +64,21 @@ tosca_definitions_version: tosca_simple_yaml_1_0
 """, dict(name=name, parameter_section=parameter_section)).assert_success()
 
 
+@pytest.mark.parametrize('name,parameter_section', SECTIONS)
+def test_node_type_parameter_fields_unicode(parser, name, parameter_section):
+    parser.parse_literal("""
+tosca_definitions_version: tosca_simple_yaml_1_0
+{{ name }}_types:
+  MyType:
+    {{ parameter_section }}:
+      參數:
+        type: string
+        description: 描述
+        default: 值
+        status: supported
+""", dict(name=name, parameter_section=parameter_section)).assert_success()
+
+
 # Status
 
 @pytest.mark.parametrize(
@@ -91,7 +107,7 @@ tosca_definitions_version: tosca_simple_yaml_1_0
     {{ parameter_section }}:
       my_param:
         type: string
-        status: bad
+        status: not a status
 """, dict(name=name, parameter_section=parameter_section)).assert_failure()
 
 

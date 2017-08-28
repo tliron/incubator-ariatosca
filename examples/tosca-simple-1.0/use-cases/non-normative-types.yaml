@@ -161,6 +161,7 @@ node_types:
         default: https://github.com/mmm/testnode.git
     interfaces:
       Standard:
+        type: tosca.interfaces.node.lifecycle.Standard # ARIA NOTE: missing in spec
         inputs:
           github_url:
             type: string

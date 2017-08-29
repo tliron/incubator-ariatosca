@@ -18,13 +18,13 @@ import itertools
 
 import pytest
 
-from .. import data
+from ... import data
 
-
+# All fields except "requirements", which is a sequenced list
 DICT_FIELD_NAMES = ('properties', 'attributes', 'capabilities', 'interfaces', 'artifacts')
 
 
-# Syntax
+# Fields
 
 @pytest.mark.parametrize('name,value', itertools.product(
     DICT_FIELD_NAMES,

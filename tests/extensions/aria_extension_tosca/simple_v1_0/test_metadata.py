@@ -59,7 +59,7 @@ metadata: {}
 """).assert_success()
 
 
-# Normative
+# Normative fields
 
 @pytest.mark.parametrize('value', data.GOOD_VERSIONS)
 def test_metadata_normative_template_version(parser, value):
@@ -79,7 +79,7 @@ metadata:
 """, dict(value=value)).assert_failure()
 
 
-# Non-normative
+# Non-normative fields
 
 def test_metadata_with_non_normative_fields(parser):
     parser.parse_literal("""

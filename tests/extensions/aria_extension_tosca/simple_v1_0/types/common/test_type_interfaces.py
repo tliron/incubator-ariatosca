@@ -18,7 +18,7 @@ import itertools
 
 import pytest
 
-from .. import data
+from ... import data
 
 
 TYPE_NAMES = ('node', 'relationship', 'group')
@@ -74,7 +74,7 @@ interface_types:
 
 @pytest.mark.skip(reason='fixed in ARIA-351')
 @pytest.mark.parametrize('name', TYPE_NAMES)
-def test_type_interface_override_type_good(parser, name):
+def test_type_interface_type_override_good(parser, name):
     parser.parse_literal("""
 tosca_definitions_version: tosca_simple_yaml_1_0
 interface_types:
@@ -94,7 +94,7 @@ interface_types:
 
 
 @pytest.mark.parametrize('name', TYPE_NAMES)
-def test_type_interface_override_type_bad(parser, name):
+def test_type_interface_type_override_bad(parser, name):
     parser.parse_literal("""
 tosca_definitions_version: tosca_simple_yaml_1_0
 interface_types:
@@ -136,7 +136,7 @@ interface_types:
 
 
 @pytest.mark.parametrize('name', TYPE_NAMES)
-def test_type_interface_inputs_override_same_type(parser, name):
+def test_type_interface_inputs_type_override_same(parser, name):
     parser.parse_literal("""
 tosca_definitions_version: tosca_simple_yaml_1_0
 interface_types:
@@ -156,12 +156,13 @@ interface_types:
 
 
 @pytest.mark.parametrize('name', TYPE_NAMES)
-def test_type_interface_inputs_override_derived_type(parser, name):
+def test_type_interface_inputs_type_override_derived(parser, name):
     parser.parse_literal("""
 tosca_definitions_version: tosca_simple_yaml_1_0
 data_types:
   MyType1: {}
-  MyType2: {}
+  MyType2:
+    derived_from: MyType1
 interface_types:
   MyType:
     inputs:
@@ -180,7 +181,7 @@ interface_types:
 
 @pytest.mark.skip(reason='fix')
 @pytest.mark.parametrize('name', TYPE_NAMES)
-def test_type_interface_inputs_override_bad(parser, name):
+def test_type_interface_inputs_type_override_bad(parser, name):
     parser.parse_literal("""
 tosca_definitions_version: tosca_simple_yaml_1_0
 data_types:
@@ -367,7 +368,8 @@ def test_type_interface_operation_inputs_override_derived_type(parser, name):
 tosca_definitions_version: tosca_simple_yaml_1_0
 data_types:
   MyType1: {}
-  MyType2: {}
+  MyType2:
+    derived_from: MyType1
 interface_types:
   MyType:
     inputs:
@@ -392,7 +394,8 @@ def test_type_interface_operation_inputs_override_bad(parser, name):
 tosca_definitions_version: tosca_simple_yaml_1_0
 data_types:
   MyType1: {}
-  MyType2: {}
+  MyType2:
+    derived_from: MyType1
 interface_types:
   MyType:
     inputs:

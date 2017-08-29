@@ -18,7 +18,7 @@ import itertools
 
 import pytest
 
-from .. import data
+from ... import data
 
 
 SECTIONS = (
@@ -56,7 +56,7 @@ tosca_definitions_version: tosca_simple_yaml_1_0
 {{ name }}_types:
   MyType:
     {{ parameter_section }}:
-      my_param:
+      my_parameter:
         type: string
         description: a description
         default: a value
@@ -92,7 +92,7 @@ tosca_definitions_version: tosca_simple_yaml_1_0
 {{ name }}_types:
   MyType:
     {{ parameter_section }}:
-      my_param:
+      my_parameter:
         type: string
         status: {{ value }}
 """, dict(name=name, parameter_section=parameter_section, value=value)).assert_success()
@@ -105,7 +105,7 @@ tosca_definitions_version: tosca_simple_yaml_1_0
 {{ name }}_types:
   MyType:
     {{ parameter_section }}:
-      my_param:
+      my_parameter:
         type: string
         status: not a status
 """, dict(name=name, parameter_section=parameter_section)).assert_failure()
@@ -123,7 +123,7 @@ tosca_definitions_version: tosca_simple_yaml_1_0
 node_types:
   MyType:
     {{ section }}:
-      my_param:
+      my_parameter:
         type: map
         entry_schema: {{ values[0] }}
 topology_template:
@@ -131,7 +131,7 @@ topology_template:
     my_template:
       type: MyType
       {{ section }}:
-        my_param:
+        my_parameter:
           key1: {{ values[1] }}
           key2: {{ values[2] }}
 """, dict(section=section, values=values)).assert_success()
@@ -147,7 +147,7 @@ tosca_definitions_version: tosca_simple_yaml_1_0
 node_types:
   MyType:
     {{ section }}:
-      my_param:
+      my_parameter:
         type: map
         entry_schema: {{ values[0] }}
 topology_template:
@@ -155,7 +155,7 @@ topology_template:
     my_template:
       type: MyType
       {{ section }}:
-        my_param:
+        my_parameter:
           key1: {{ values[1] }}
           key2: {{ values[2] }}
 """, dict(section=section, values=values)).assert_failure()
@@ -171,7 +171,7 @@ tosca_definitions_version: tosca_simple_yaml_1_0
 node_types:
   MyType:
     {{ section }}:
-      my_param:
+      my_parameter:
         type: list
         entry_schema: {{ values[0] }}
 topology_template:
@@ -179,7 +179,7 @@ topology_template:
     my_template:
       type: MyType
       {{ section }}:
-        my_param:
+        my_parameter:
           - {{ values[1] }}
           - {{ values[2] }}
 """, dict(section=section, values=values)).assert_success()
@@ -195,7 +195,7 @@ tosca_definitions_version: tosca_simple_yaml_1_0
 node_types:
   MyType:
     {{ section }}:
-      my_param:
+      my_parameter:
         type: list
         entry_schema: {{ values[0] }}
 topology_template:
@@ -203,7 +203,7 @@ topology_template:
     my_template:
       type: MyType
       {{ section }}:
-        my_param:
+        my_parameter:
           - {{ values[1] }}
           - {{ values[2] }}
 """, dict(section=section, values=values)).assert_failure()
@@ -262,26 +262,26 @@ topology_template:
 # Overriding
 
 @pytest.mark.parametrize('section', SECTION_NAMES)
-def test_node_type_parameter_override_add_default(parser, section):
+def test_node_type_parameter_add_default(parser, section):
     parser.parse_literal("""
 tosca_definitions_version: tosca_simple_yaml_1_0
 node_types:
   MyType1:
     {{ section }}:
-      my_param:
+      my_parameter:
         type: string
   MyType2:
     derived_from: MyType1
     {{ section }}:
-      my_param:
+      my_parameter:
         type: string
         default: my value 
 """, dict(section=section)).assert_success()
 
 
 @pytest.mark.skip(reason='fixed in ARIA-351')
-@pytest.mark.parametrize('section', ('properties', 'attributes'))
-def test_node_type_parameter_override_change_type_good(parser, section):
+@pytest.mark.parametrize('section', SECTION_NAMES)
+def test_node_type_parameter_type_override(parser, section):
     parser.parse_literal("""
 tosca_definitions_version: tosca_simple_yaml_1_0
 data_types:
@@ -297,18 +297,18 @@ data_types:
 node_types:
   MyType1:
     {{ section }}:
-      my_param:
+      my_parameter:
         type: MyType1
   MyType2:
     derived_from: MyType1
     {{ section }}:
-      my_param:
+      my_parameter:
         type: MyType2
 """, dict(section=section)).assert_success()
 
 
-@pytest.mark.parametrize('section', ('properties', 'attributes'))
-def test_node_type_parameter_override_change_type_bad(parser, section):
+@pytest.mark.parametrize('section', SECTION_NAMES)
+def test_node_type_parameter_type_override_bad(parser, section):
     parser.parse_literal("""
 tosca_definitions_version: tosca_simple_yaml_1_0
 data_types:
@@ -324,11 +324,11 @@ data_types:
 node_types:
   MyType1:
     {{ section }}:
-      my_param:
+      my_parameter:
         type: MyType2
   MyType2:
     derived_from: MyType1
     {{ section }}:
-      my_param:
+      my_parameter:
         type: MyType1
 """, dict(section=section)).assert_failure()

@@ -17,19 +17,12 @@
 
 # Overriding
 
-def test_node_type_requirement_override_change_type_good1(parser):
+def test_node_type_requirement_override_change_type_good(parser):
     parser.parse_literal("""
 tosca_definitions_version: tosca_simple_yaml_1_0
 capability_types:
-  MyType1:
-    properties:
-      prop1:
-        type: string
-  MyType2:
-    derived_from: MyType1
-    properties:
-      prop2:
-        type: integer
+  MyType1: {}
+  MyType2: {}
 node_types:
   MyType1:
     requirements:
@@ -39,31 +32,5 @@ node_types:
     derived_from: MyType1
     requirements:
       - my_requirement:
-          capability: MyType2
-""").assert_success()
-
-
-def test_node_type_requirement_override_change_type_good2(parser):
-    parser.parse_literal("""
-tosca_definitions_version: tosca_simple_yaml_1_0
-capability_types:
-  MyType1:
-    properties:
-      prop1:
-        type: string
-  MyType2:
-    derived_from: MyType1
-    properties:
-      prop2:
-        type: integer
-node_types:
-  MyType1:
-    requirements:
-      - my_requirement:
-          capability: MyType2
-  MyType2:
-    derived_from: MyType1
-    requirements:
-      - my_requirement:
-          capability: MyType1 # you should be allowed to change the capability type to anything
+          capability: MyType2 # you should be allowed to change the capability type to anything
 """).assert_success()

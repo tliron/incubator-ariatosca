@@ -342,6 +342,8 @@ class RelationshipDefinition(ExtensiblePresentation):
         The optional reserved keyname used to provide the name of the Relationship Type for the
         requirement definition's relationship keyname.
 
+        ARIA NOTE: the spec shows this as a required field.
+
         :type: :obj:`basestring`
         """
 

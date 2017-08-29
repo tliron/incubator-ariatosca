@@ -138,7 +138,7 @@ topology_template:
 """, dict(repository=repository)).assert_success()
 
 
-# Failures
+# Bad imports
 
 def test_import_not_found(parser):
     parser.parse_literal("""

@@ -314,7 +314,9 @@ class CapabilityType(ExtensiblePresentation):
 
     @cachedmethod
     def _is_descendant(self, context, other_type):
-        """returns True iff `other_type` is a descendant of the represented capability type"""
+        """
+        Checks if ``other_type`` is our descendant (or equal to us).
+        """
         if other_type is None:
             return False
         elif other_type._name == self._name:
@@ -326,12 +328,17 @@ class CapabilityType(ExtensiblePresentation):
         return FrozenDict(get_inherited_parameter_definitions(context, self, 'properties'))
 
     @cachedmethod
+    def _get_attributes(self, context):
+        return FrozenDict(get_inherited_parameter_definitions(context, self, 'attributes'))
+
+    @cachedmethod
     def _get_valid_source_types(self, context):
         return get_inherited_valid_source_types(context, self)
 
     def _validate(self, context):
         super(CapabilityType, self)._validate(context)
         self._get_properties(context)
+        self._get_attributes(context)
 
     def _dump(self, context):
         self._dump_content(context, (
@@ -512,6 +519,9 @@ class RelationshipType(ExtensiblePresentation):
 
     @cachedmethod
     def _is_descendant(self, context, the_type):
+        """
+        Checks if ``other_type`` is our descendant (or equal to us).
+        """
         if the_type is None:
             return False
         elif the_type._name == self._name:
@@ -644,6 +654,9 @@ class NodeType(ExtensiblePresentation):
 
     @cachedmethod
     def _is_descendant(self, context, the_type):
+        """
+        Checks if ``other_type`` is our descendant (or equal to us).
+        """
         if the_type is None:
             return False
         elif the_type._name == self._name:
@@ -781,6 +794,9 @@ class GroupType(ExtensiblePresentation):
 
     @cachedmethod
     def _is_descendant(self, context, the_type):
+        """
+        Checks if ``other_type`` is our descendant (or equal to us).
+        """
         if the_type is None:
             return False
         elif the_type._name == self._name:

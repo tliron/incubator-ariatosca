@@ -15,9 +15,8 @@
 # limitations under the License.
 
 
-NOT_A_DICT = ('null', 'a string', '123', '0.123', '[]')
-NOT_A_LIST = ('null', 'a string', '123', '0.123', '{}')
-NOT_A_STRING = ('123', '0.123', '[]', '{}')
+# Keywords
+
 TYPE_NAMES = ('artifact', 'data', 'capability', 'interface', 'relationship', 'node', 'group',
               'policy')
 TYPE_NAME_PLURAL = {
@@ -36,6 +35,44 @@ TEMPLATE_NAME_SECTION = {
     'group': 'groups',
     'policy': 'policies'
 }
+PARAMETER_SECTION_NAMES = ('properties', 'attributes')
+PARAMETER_SECTIONS = (
+    ('artifact', 'properties'),
+    ('data', 'properties'),
+    ('capability', 'properties'),
+    ('capability', 'attributes'),
+    ('interface', 'inputs'),
+    ('relationship', 'properties'),
+    ('relationship', 'attributes'),
+    ('node', 'properties'),
+    ('node', 'attributes'),
+    ('group', 'properties'),
+    ('policy', 'properties')
+)
+
+
+# Values
+
+NOT_A_DICT = ('null', 'a string', '123', '0.123', '[]')
+NOT_A_LIST = ('null', 'a string', '123', '0.123', '{}')
+NOT_A_STRING = ('123', '0.123', '[]', '{}')
+NOT_A_RANGE = NOT_A_LIST + (
+    '[]', '[ 1 ]', '[ 1, 2, 3 ]',
+    '[ 1, 1 ]', '[ 2, 1 ]',
+    '[ 1, a string ]', '[ a string, 1 ]',
+    '[ 1.5, 2 ]', '[ 1, 2.5 ]'
+)
+NOT_OCCURRENCES = NOT_A_RANGE + ('[ -1, 1 ]',)
 GOOD_VERSIONS = ("'6.1'", '2.0.1', '3.1.0.beta', "'1.0.0.alpha-10'")
 BAD_VERSIONS = ('a_string', '1.2.3.4.5', '1.2.beta', '1.0.0.alpha-x')
 STATUSES = ('supported', 'unsupported', 'experimental', 'deprecated')
+ENTRY_SCHEMA_VALUES = (
+    ('string', 'a string', 'another string'),
+    ('integer', '1', '2'),
+    ('float', '1.1', '2.2')
+)
+ENTRY_SCHEMA_VALUES_BAD = (
+    ('string', 'a string', '1'),
+    ('integer', '1', 'a string'),
+    ('float', '1.1', 'a string')
+)

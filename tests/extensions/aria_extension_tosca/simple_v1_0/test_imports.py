@@ -37,7 +37,7 @@ node_types:
 BAD_IMPORT = """
 node_types:
   MyNode:
-    derived_from: not.a.node.type
+    derived_from: UnknownType
 """
 
 @pytest.fixture(scope='session')

@@ -14,11 +14,17 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+
+"""
+Developer note: make sure that these tests mirror those in
+test_node_type_relationship_interfaces.py.
+"""
+
 import itertools
 
 import pytest
 
-from ... import data
+from .. import data
 
 
 TYPE_NAMES = ('node', 'relationship', 'group')
@@ -65,8 +71,24 @@ interface_types:
       my_interface:
         type: MyType
         inputs: {}
-        operation1: {}
-        operation2: {}
+        my_operation1: {}
+        my_operation2: {}
+""", dict(name=name)).assert_success()
+
+
+@pytest.mark.parametrize('name', TYPE_NAMES)
+def test_type_interface_fields_unicode(parser, name):
+    parser.parse_literal("""
+tosca_definitions_version: tosca_simple_yaml_1_0
+interface_types:
+  類型: {}
+{{ name }}_types:
+  類型:
+    interfaces:
+      接口:
+        type: 類型
+        手術:
+          implementation: 履行
 """, dict(name=name)).assert_success()
 
 
@@ -74,12 +96,13 @@ interface_types:
 
 @pytest.mark.skip(reason='fixed in ARIA-351')
 @pytest.mark.parametrize('name', TYPE_NAMES)
-def test_type_interface_type_override_good(parser, name):
+def test_type_interface_type_override(parser, name):
     parser.parse_literal("""
 tosca_definitions_version: tosca_simple_yaml_1_0
 interface_types:
   MyType1: {}
-  MyType2: {}
+  MyType2:
+    derived_form: MyType1
 {{ name }}_types:
   MyType1:
     interfaces:
@@ -99,7 +122,8 @@ def test_type_interface_type_override_bad(parser, name):
 tosca_definitions_version: tosca_simple_yaml_1_0
 interface_types:
   MyType1: {}
-  MyType2: {}
+  MyType2:
+    derived_form: MyType1
 {{ name }}_types:
   MyType1:
     interfaces:
@@ -142,7 +166,7 @@ tosca_definitions_version: tosca_simple_yaml_1_0
 interface_types:
   MyType:
     inputs:
-      my_input1:
+      my_input:
         type: string
 {{ name }}_types:
   MyType:
@@ -150,7 +174,7 @@ interface_types:
       my_interface:
         type: MyType
         inputs:
-          my_input1:
+          my_input:
             type: string
 """, dict(name=name)).assert_success()
 
@@ -166,7 +190,7 @@ data_types:
 interface_types:
   MyType:
     inputs:
-      my_input1:
+      my_input:
         type: MyType1
 {{ name }}_types:
   MyType:
@@ -174,7 +198,7 @@ interface_types:
       my_interface:
         type: MyType
         inputs:
-          my_input1:
+          my_input:
             type: MyType2
 """, dict(name=name)).assert_success()
 
@@ -186,11 +210,12 @@ def test_type_interface_inputs_type_override_bad(parser, name):
 tosca_definitions_version: tosca_simple_yaml_1_0
 data_types:
   MyType1: {}
-  MyType2: {}
+  MyType2:
+    derived_from: MyType1
 interface_types:
   MyType:
     inputs:
-      my_input1:
+      my_input:
         type: MyType2
 {{ name }}_types:
   MyType:
@@ -198,7 +223,7 @@ interface_types:
       my_interface:
         type: MyType
         inputs:
-          my_input1:
+          my_input:
             type: MyType1
 """, dict(name=name)).assert_failure()
 
@@ -216,7 +241,7 @@ interface_types:
     interfaces:
       my_interface:
         type: MyType
-        operation1: {}
+        my_operation: {}
 """, dict(name=name)).assert_success()
 
 
@@ -231,7 +256,7 @@ interface_types:
     interfaces:
       my_interface:
         type: MyType
-        operation1:
+        my_operation:
           description: a description
           implementation: {}
           inputs: {}
@@ -251,7 +276,7 @@ interface_types:
     interfaces:
       my_interface:
         type: MyType
-        operation1:
+        my_operation:
           implementation: an implementation
 """, dict(name=name)).assert_success()
 
@@ -267,7 +292,7 @@ interface_types:
     interfaces:
       my_interface:
         type: MyType
-        operation1:
+        my_operation:
           implementation:
             primary: an implementation
             dependencies:
@@ -290,7 +315,7 @@ interface_types:
     interfaces:
       my_interface:
         type: MyType
-        operation1:
+        my_operation:
           implementation:
             primary: {{ value }}
 """, dict(name=name, value=value)).assert_failure()
@@ -310,7 +335,7 @@ interface_types:
     interfaces:
       my_interface:
         type: MyType
-        operation1:
+        my_operation:
           implementation:
             primary: an implementation
             dependencies:
@@ -327,16 +352,16 @@ tosca_definitions_version: tosca_simple_yaml_1_0
 interface_types:
   MyType:
     inputs:
-      my_input1:
+      my_input:
         type: string
 {{ name }}_types:
   MyType:
     interfaces:
       my_interface:
         type: MyType
-        operation1:
+        my_operation:
           inputs:
-            my_input2:
+            my_input:
               type: string
 """, dict(name=name)).assert_success()
 
@@ -348,16 +373,16 @@ tosca_definitions_version: tosca_simple_yaml_1_0
 interface_types:
   MyType:
     inputs:
-      my_input1:
+      my_input:
         type: string
 {{ name }}_types:
   MyType:
     interfaces:
       my_interface:
         type: MyType
-        operation1:
+        my_operation:
           inputs:
-            my_input1:
+            my_input:
               type: string
 """, dict(name=name)).assert_success()
 
@@ -373,16 +398,16 @@ data_types:
 interface_types:
   MyType:
     inputs:
-      my_input1:
+      my_input:
         type: MyType1
 {{ name }}_types:
   MyType:
     interfaces:
       my_interface:
         type: MyType
-        operation1:
+        my_operation:
           inputs:
-            my_input1:
+            my_input:
               type: MyType2
 """, dict(name=name)).assert_success()
 
@@ -399,15 +424,15 @@ data_types:
 interface_types:
   MyType:
     inputs:
-      my_input1:
+      my_input:
         type: MyType2
 {{ name }}_types:
   MyType:
     interfaces:
       my_interface:
         type: MyType
-        operation1:
+        my_operation:
           inputs:
-            my_input1:
+            my_input:
               type: MyType1
 """, dict(name=name)).assert_failure()

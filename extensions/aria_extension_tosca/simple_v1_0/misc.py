@@ -81,7 +81,7 @@ class MetaData(ExtensiblePresentation):
         as a single-line string value.
         """
 
-    @field_getter(data_type_class_getter(Version))
+    @field_getter(data_type_class_getter(Version, allow_null=True))
     @primitive_field(str)
     @implements_specification('3.9.3.5', 'tosca-simple-1.0')
     def template_version(self):

@@ -473,8 +473,7 @@ class Field(object):
 
         # Handle get according to variant
 
-        getter = getattr(self, '_get_{field_variant}'.format(field_variant=self.field_variant),
-                         None)
+        getter = getattr(self, '_get_{0}'.format(self.field_variant), None)
 
         if getter is None:
             locator = self.get_locator(raw)

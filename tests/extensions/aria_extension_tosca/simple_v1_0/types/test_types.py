@@ -18,7 +18,7 @@ import itertools
 
 import pytest
 
-from ... import data
+from .. import data
 
 
 # Syntax

@@ -18,7 +18,7 @@ import itertools
 
 import pytest
 
-from .. import data
+from ... import data
 
 
 # Syntax
@@ -57,7 +57,7 @@ tosca_definitions_version: tosca_simple_yaml_1_0
 """, dict(name=name, value=value)).assert_failure()
 
 
-# Derivation
+# Derived from
 
 @pytest.mark.parametrize('name', data.TYPE_NAMES)
 def test_type_derived_from_unknown(parser, name):
@@ -108,9 +108,10 @@ def test_type_derived_from_root(parser, name):
     parser.parse_literal("""
 tosca_definitions_version: tosca_simple_yaml_1_0
 {{ name }}_types:
-  MyType:
-    derived_from: tosca.{{ plural }}.Root
-""", dict(name=name, plural=data.TYPE_NAME_PLURAL[name])).assert_success()
+  MyType1: {}
+  MyType2:
+    derived_from: MyType1
+""", dict(name=name)).assert_success()
 
 
 # Common fields
@@ -120,11 +121,12 @@ def test_type_fields(parser, name):
     parser.parse_literal("""
 tosca_definitions_version: tosca_simple_yaml_1_0
 {{ name }}_types:
-  MyType:
-    derived_from: tosca.{{ plural }}.Root
+  MyType1: {}
+  MyType2:
+    derived_from: MyType1
     version: 1.0.0
     description: a description
-""", dict(name=name, plural=data.TYPE_NAME_PLURAL[name])).assert_success()
+""", dict(name=name)).assert_success()
 
 
 @pytest.mark.parametrize('name', data.TYPE_NAMES)
@@ -132,11 +134,12 @@ def test_type_fields_unicode(parser, name):
     parser.parse_literal("""
 tosca_definitions_version: tosca_simple_yaml_1_0
 {{ name }}_types:
-  類型:
-    derived_from: tosca.{{ plural }}.Root
+  類型一: {}
+  類型二:
+    derived_from: 類型一
     version: 1.0.0.詠嘆調-10
     description: 描述
-""", dict(name=name, plural=data.TYPE_NAME_PLURAL[name])).assert_success()
+""", dict(name=name)).assert_success()
 
 
 @pytest.mark.parametrize('name,value', itertools.product(

@@ -14,61 +14,56 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import itertools
+
 import pytest
 
 from .. import data
 
 
-# Syntax
+# Derived from primitive
 
-def test_artifact_type_fields(parser):
+@pytest.mark.parametrize('name', data.PRIMITIVE_TYPE_NAMES)
+def test_data_type_derived_from_primitive(parser, name):
     parser.parse_literal("""
 tosca_definitions_version: tosca_simple_yaml_1_0
-artifact_types:
+data_types:
   MyType:
-    mime_type: a mime type
-    file_ext: [ an extension ]
-""").assert_success()
+    derived_from: {{ name }} 
+""", dict(name=name)).assert_success()
 
 
-# MIME type
+# Constraints
 
-@pytest.mark.parametrize('value', data.NOT_A_STRING)
-def test_artifact_type_mime_type_wrong_yaml_type(parser, value):
+@pytest.mark.parametrize('name,value', itertools.product(
+    data.PRIMITIVE_TYPE_NAMES,
+    data.NOT_A_LIST
+))
+def test_data_type_constraints_wrong_yaml_type(parser, name, value):
     parser.parse_literal("""
 tosca_definitions_version: tosca_simple_yaml_1_0
-artifact_types:
+data_types:
   MyType:
-    mime_type: {{ value }}
-""", dict(value=value)).assert_failure()
+    derived_from: string
+    constraints: {{ value }}
+""", dict(name=name, value=value)).assert_failure()
 
 
-# File extension
-
-@pytest.mark.parametrize('value', data.NOT_A_LIST)
-def test_artifact_type_file_ext_wrong_yaml_type(parser, value):
+@pytest.mark.parametrize('name', data.PRIMITIVE_TYPE_NAMES)
+def test_data_type_constraints_empty(parser, name):
     parser.parse_literal("""
 tosca_definitions_version: tosca_simple_yaml_1_0
-artifact_types:
+data_types:
   MyType:
-    file_ext: {{ value }}
-""", dict(value=value)).assert_failure()
+    derived_from: string
+    constraints: []
+""", dict(name=name)).assert_success()
 
 
-def test_artifact_type_file_ext_empty(parser):
+def test_data_type_constraints_not_primitive(parser):
     parser.parse_literal("""
 tosca_definitions_version: tosca_simple_yaml_1_0
-artifact_types:
+data_types:
   MyType:
-    file_ext: []
-""").assert_success()
-
-
-@pytest.mark.parametrize('value', data.NOT_A_STRING)
-def test_artifact_type_file_ext_element_wrong_yaml_type(parser, value):
-    parser.parse_literal("""
-tosca_definitions_version: tosca_simple_yaml_1_0
-artifact_types:
-  MyType:
-    file_ext: [ {{ value }} ]
-""", dict(value=value)).assert_failure()
+    constraints: [] # can't have constraints if not a primitive
+""").assert_failure()

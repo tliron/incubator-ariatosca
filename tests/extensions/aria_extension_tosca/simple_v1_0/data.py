@@ -29,6 +29,7 @@ TYPE_NAME_PLURAL = {
     'group': 'groups',
     'policy': 'policies'
 }
+PRIMITIVE_TYPE_NAMES = ('string', 'integer', 'float', 'boolean')
 TEMPLATE_NAMES = ('node', 'group', 'policy')
 TEMPLATE_NAME_SECTION = {
     'node': 'node_templates',
@@ -49,7 +50,20 @@ PARAMETER_SECTIONS = (
     ('group', 'properties'),
     ('policy', 'properties')
 )
-
+PARAMETER_WITH_CONSTRAINTS_SECTIONS = (
+    ('artifact', 'properties'),
+    ('data', 'properties'),
+    ('capability', 'properties'),
+    ('interface', 'inputs'),
+    ('relationship', 'properties'),
+    ('node', 'properties'),
+    ('group', 'properties'),
+    ('policy', 'properties')
+)
+CONSTRAINTS_WITH_VALUE = ('equal', 'greater_than', 'greater_or_equal', 'less_than', 'less_or_equal')
+CONSTRAINTS_WITH_VALUE_LIST = ('valid_values',)
+CONSTRAINTS_WITH_VALUE_RANGE = ('in_range',)
+CONSTRAINTS_WITH_NON_NEGATIVE_INT = ('length', 'min_length', 'max_length')
 
 # Values
 

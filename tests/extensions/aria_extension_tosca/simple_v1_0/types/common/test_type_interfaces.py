@@ -16,15 +16,16 @@
 
 
 """
-Developer note: make sure that these tests mirror those in
-test_node_type_relationship_interfaces.py.
+Developer note: make sure that these tests mirror those in:
+ test_interface_type.py,
+ test_node_type_relationship_interfaces.py.
 """
 
 import itertools
 
 import pytest
 
-from .. import data
+from ... import data
 
 
 TYPE_NAMES = ('node', 'relationship', 'group')

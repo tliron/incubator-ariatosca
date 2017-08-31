@@ -15,7 +15,9 @@
 # limitations under the License.
 
 """
-Developer note: make sure that these tests mirror those in test_type_interfaces.py.
+Developer note: make sure that these tests mirror those in:
+ test_interface_type.py,
+ test_type_interfaces.py.
 """
 
 import pytest

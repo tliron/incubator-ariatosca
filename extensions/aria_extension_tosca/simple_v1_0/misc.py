@@ -21,7 +21,7 @@ from aria.parser.presentation import (AsIsPresentation, has_fields, allow_unknow
                                       short_form_field, primitive_field, primitive_list_field,
                                       primitive_dict_unknown_fields, object_field,
                                       object_list_field, object_dict_field, field_getter,
-                                      field_validator, type_validator)
+                                      field_validator, type_validator, not_negative_validator)
 
 from .data_types import Version
 from .modeling.data_types import (get_data_type, get_data_type_value, get_property_constraints,
@@ -258,18 +258,21 @@ class ConstraintClause(ExtensiblePresentation):
         Constrains a property or parameter to a value that is in the list of declared values.
         """
 
+    @field_validator(not_negative_validator)
     @primitive_field(int)
     def length(self):
         """
         Constrains the property or parameter to a value of a given length.
         """
 
+    @field_validator(not_negative_validator)
     @primitive_field(int)
     def min_length(self):
         """
         Constrains the property or parameter to a value to a minimum length.
         """
 
+    @field_validator(not_negative_validator)
     @primitive_field(int)
     def max_length(self):
         """

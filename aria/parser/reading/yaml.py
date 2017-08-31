@@ -82,7 +82,11 @@ class YamlReader(Reader):
             # see issue here:
             # https://bitbucket.org/ruamel/yaml/issues/61/roundtriploader-causes-exceptions-with
             #yaml_loader = yaml.RoundTripLoader(data)
-            yaml_loader = yaml.SafeLoader(data)
+            try:
+                # Faster C-based loader, might not be available on all platforms
+                yaml_loader = yaml.CSafeLoader(data)
+            except BaseException:
+                yaml_loader = yaml.SafeLoader(data)
             try:
                 node = yaml_loader.get_single_node()
                 locator = YamlLocator(self.loader.location, 0, 0)

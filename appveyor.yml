@@ -34,8 +34,7 @@ before_test:
   - virtualenv env
   - 'env\Scripts\activate.bat'
   - pip install tox
+  - tox --version
 
 test_script:
-  - pip --version
-  - tox --version
   - tox -e %TOX_ENV%

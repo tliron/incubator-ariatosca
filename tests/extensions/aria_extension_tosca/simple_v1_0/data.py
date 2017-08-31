@@ -30,13 +30,19 @@ TYPE_NAME_PLURAL = {
     'policy': 'policies'
 }
 PRIMITIVE_TYPE_NAMES = ('string', 'integer', 'float', 'boolean')
+PARAMETER_SECTION_NAMES = ('properties', 'attributes')
 TEMPLATE_NAMES = ('node', 'group', 'policy')
-TEMPLATE_NAME_SECTION = {
+TEMPLATE_NAME_SECTIONS = {
     'node': 'node_templates',
     'group': 'groups',
     'policy': 'policies'
 }
-PARAMETER_SECTION_NAMES = ('properties', 'attributes')
+TEMPLATE_PARAMETER_SECTIONS = (
+    ('node', 'properties'),
+    ('node', 'attributes'),
+    ('group', 'properties'),
+    ('policy', 'properties')
+)
 PARAMETER_SECTIONS = (
     ('artifact', 'properties'),
     ('data', 'properties'),
@@ -83,10 +89,12 @@ STATUSES = ('supported', 'unsupported', 'experimental', 'deprecated')
 ENTRY_SCHEMA_VALUES = (
     ('string', 'a string', 'another string'),
     ('integer', '1', '2'),
-    ('float', '1.1', '2.2')
+    ('float', '1.1', '2.2'),
+    ('MyType', '{my_field: a string}', '{}')
 )
 ENTRY_SCHEMA_VALUES_BAD = (
     ('string', 'a string', '1'),
     ('integer', '1', 'a string'),
-    ('float', '1.1', 'a string')
+    ('float', '1.1', 'a string'),
+    ('MyType', '{my_field1: a string}', 'a string')
 )

@@ -31,7 +31,7 @@ topology_template: {{ value }}
 """, dict(value=value)).assert_failure()
 
 
-def test_topology_template_emtpy(parser):
+def test_topology_template_empty(parser):
     parser.parse_literal("""
 tosca_definitions_version: tosca_simple_yaml_1_0
 topology_template: {}
@@ -47,7 +47,7 @@ def test_template_section_wrong_yaml_type(parser, name, value):
 tosca_definitions_version: tosca_simple_yaml_1_0
 topology_template:
   {{ section }}: {{ value }}
-""", dict(section=data.TEMPLATE_NAME_SECTION[name], value=value)).assert_failure()
+""", dict(section=data.TEMPLATE_NAME_SECTIONS[name], value=value)).assert_failure()
 
 
 @pytest.mark.parametrize('name,value', itertools.product(
@@ -61,7 +61,7 @@ topology_template:
   {{ section }}:
     my_template:
       type: {{ value }}
-""", dict(section=data.TEMPLATE_NAME_SECTION[name], value=value)).assert_failure()
+""", dict(section=data.TEMPLATE_NAME_SECTIONS[name], value=value)).assert_failure()
 
 
 # Common fields
@@ -70,32 +70,18 @@ topology_template:
 def test_template_fields(parser, name):
     parser.parse_literal("""
 tosca_definitions_version: tosca_simple_yaml_1_0
-topology_template:
-  {{ section }}:
-    my_template:
-      type: tosca.{{ plural }}.Root
-      description: a description
-""", dict(section=data.TEMPLATE_NAME_SECTION[name],
-          plural=data.TYPE_NAME_PLURAL[name])).assert_success()
-
-
-# Of types
-
-@pytest.mark.parametrize('name', data.TEMPLATE_NAMES)
-def test_template_of_type(parser, name):
-    parser.parse_literal("""
-tosca_definitions_version: tosca_simple_yaml_1_0
 {{ name }}_types:
     MyType: {}
 topology_template:
   {{ section }}:
     my_template:
       type: MyType
-""", dict(name=name, section=data.TEMPLATE_NAME_SECTION[name])).assert_success()
+      description: a description
+""", dict(name=name, section=data.TEMPLATE_NAME_SECTIONS[name])).assert_success()
 
 
 @pytest.mark.parametrize('name', data.TEMPLATE_NAMES)
-def test_template_of_type_unicode(parser, name):
+def test_template_fields_unicode(parser, name):
     parser.parse_literal("""
 tosca_definitions_version: tosca_simple_yaml_1_0
 {{ name }}_types:
@@ -104,7 +90,8 @@ topology_template:
   {{ section }}:
     模板:
       type: 類型
-""", dict(name=name, section=data.TEMPLATE_NAME_SECTION[name])).assert_success()
+      description: 描述
+""", dict(name=name, section=data.TEMPLATE_NAME_SECTIONS[name])).assert_success()
 
 
 @pytest.mark.parametrize('name', data.TEMPLATE_NAMES)
@@ -115,7 +102,7 @@ topology_template:
   {{ section }}:
     my_template:
       type: UnknownType
-""", dict(section=data.TEMPLATE_NAME_SECTION[name])).assert_failure()
+""", dict(section=data.TEMPLATE_NAME_SECTIONS[name])).assert_failure()
 
 
 @pytest.mark.parametrize('name', data.TEMPLATE_NAMES)
@@ -126,4 +113,4 @@ topology_template:
   {{ section }}:
     my_template:
       type: null
-""", dict(section=data.TEMPLATE_NAME_SECTION[name])).assert_failure()
+""", dict(section=data.TEMPLATE_NAME_SECTIONS[name])).assert_failure()

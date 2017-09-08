@@ -86,6 +86,13 @@ NOT_OCCURRENCES = NOT_A_RANGE + ('[ -1, 1 ]',)
 GOOD_VERSIONS = ("'6.1'", '2.0.1', '3.1.0.beta', "'1.0.0.alpha-10'")
 BAD_VERSIONS = ('a_string', '1.2.3.4.5', '1.2.beta', '1.0.0.alpha-x')
 STATUSES = ('supported', 'unsupported', 'experimental', 'deprecated')
+PARAMETER_TYPE_NAMES = PRIMITIVE_TYPE_NAMES + ('MyType',)
+PARAMETER_VALUES = (
+    ('string', 'a string'),
+    ('integer', '1'),
+    ('float', '1.1'),
+    ('MyType', '{my_field: a string}')
+)
 ENTRY_SCHEMA_VALUES = (
     ('string', 'a string', 'another string'),
     ('integer', '1', '2'),

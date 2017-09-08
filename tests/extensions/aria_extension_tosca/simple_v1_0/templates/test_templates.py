@@ -23,21 +23,6 @@ from .. import data
 
 # Syntax
 
-@pytest.mark.parametrize('value', data.NOT_A_DICT)
-def test_topology_template_wrong_yaml_type(parser, value):
-    parser.parse_literal("""
-tosca_definitions_version: tosca_simple_yaml_1_0
-topology_template: {{ value }}
-""", dict(value=value)).assert_failure()
-
-
-def test_topology_template_empty(parser):
-    parser.parse_literal("""
-tosca_definitions_version: tosca_simple_yaml_1_0
-topology_template: {}
-""").assert_success()
-
-
 @pytest.mark.parametrize('name,value', itertools.product(
     data.TEMPLATE_NAMES,
     data.NOT_A_DICT

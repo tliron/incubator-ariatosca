@@ -24,54 +24,84 @@ from .. import data
 # Required properties
 
 @pytest.mark.skip(reason='fixed in ARIA-351')
-@pytest.mark.parametrize('name', data.TEMPLATE_NAMES)
-def test_template_property_required(parser, name):
+@pytest.mark.parametrize('name,type_name', itertools.product(
+    data.TEMPLATE_NAMES,
+    data.PARAMETER_TYPE_NAMES
+))
+def test_template_property_required(parser, name, type_name):
     parser.parse_literal("""
 tosca_definitions_version: tosca_simple_yaml_1_0
+data_types:
+  MyType:
+    properties:
+      my_field:
+        type: string
 {{ name }}_types:
   MyType:
     properties:
       my_property:
-        type: string
+        type: {{ type_name }}
 topology_template:
   {{ section }}:
     my_template:
       type: MyType
-""", dict(name=name, section=data.TEMPLATE_NAME_SECTIONS[name])).assert_failure()
+""", dict(name=name, section=data.TEMPLATE_NAME_SECTIONS[name],
+          type_name=type_name)).assert_failure()
 
 
-@pytest.mark.parametrize('name', data.TEMPLATE_NAMES)
-def test_template_property_not_required(parser, name):
+@pytest.mark.parametrize('name,type_name', itertools.product(
+    data.TEMPLATE_NAMES,
+    data.PARAMETER_TYPE_NAMES
+))
+def test_template_property_not_required(parser, name, type_name):
     parser.parse_literal("""
 tosca_definitions_version: tosca_simple_yaml_1_0
+data_types:
+  MyType:
+    properties:
+      my_field:
+        type: string
 {{ name }}_types:
   MyType:
     properties:
       my_property:
-        type: string
+        type: {{ type_name }}
         required: false
 topology_template:
   {{ section }}:
     my_template:
       type: MyType
-""", dict(name=name, section=data.TEMPLATE_NAME_SECTIONS[name])).assert_success()
+""", dict(name=name, section=data.TEMPLATE_NAME_SECTIONS[name],
+          type_name=type_name)).assert_success()
 
 
-@pytest.mark.parametrize('name', data.TEMPLATE_NAMES)
-def test_template_property_required_with_default(parser, name):
+@pytest.mark.parametrize(
+    'name,type_name,value',
+    ((s, v[0], v[1])
+     for s, v in itertools.product(
+         data.TEMPLATE_NAMES,
+         data.PARAMETER_VALUES))
+)
+def test_template_property_required_with_default(parser, name, type_name, value):
     parser.parse_literal("""
 tosca_definitions_version: tosca_simple_yaml_1_0
+data_types:
+  MyType:
+    properties:
+      my_field:
+        type: string
 {{ name }}_types:
   MyType:
     properties:
       my_property:
-        type: string
-        default: a string
+        type: {{ type_name }}
+        default: {{ value }}
 topology_template:
   {{ section }}:
     my_template:
       type: MyType
-""", dict(name=name, section=data.TEMPLATE_NAME_SECTIONS[name])).assert_success()
+""", dict(name=name, section=data.TEMPLATE_NAME_SECTIONS[name], type_name=type_name,
+          value=value)).assert_success()
 
 
 # Entry schema

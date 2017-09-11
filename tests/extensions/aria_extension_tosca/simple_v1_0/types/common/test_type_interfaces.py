@@ -95,7 +95,6 @@ interface_types:
 
 # Type
 
-@pytest.mark.skip(reason='fixed in ARIA-351')
 @pytest.mark.parametrize('name', TYPE_NAMES)
 def test_type_interface_type_override(parser, name):
     parser.parse_literal("""
@@ -103,7 +102,7 @@ tosca_definitions_version: tosca_simple_yaml_1_0
 interface_types:
   MyType1: {}
   MyType2:
-    derived_form: MyType1
+    derived_from: MyType1
 {{ name }}_types:
   MyType1:
     interfaces:
@@ -124,7 +123,7 @@ tosca_definitions_version: tosca_simple_yaml_1_0
 interface_types:
   MyType1: {}
   MyType2:
-    derived_form: MyType1
+    derived_from: MyType1
 {{ name }}_types:
   MyType1:
     interfaces:

@@ -132,7 +132,7 @@ relationship_types:
 interface_types:
   MyType1: {}
   MyType2:
-    derived_form: MyType1
+    derived_from: MyType1
 node_types:
   MyType:
     requirements:
@@ -156,7 +156,7 @@ relationship_types:
 interface_types:
   MyType1: {}
   MyType2:
-    derived_form: MyType1
+    derived_from: MyType1
 node_types:
   MyType1:
     requirements:
@@ -194,7 +194,7 @@ relationship_types:
 interface_types:
   MyType1: {}
   MyType2:
-    derived_form: MyType1
+    derived_from: MyType1
 node_types:
   MyType:
     requirements:
@@ -219,7 +219,7 @@ relationship_types:
 interface_types:
   MyType1: {}
   MyType2:
-    derived_form: MyType1
+    derived_from: MyType1
 node_types:
   MyType1:
     requirements:

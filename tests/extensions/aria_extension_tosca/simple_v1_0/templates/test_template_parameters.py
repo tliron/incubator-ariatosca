@@ -23,7 +23,6 @@ from .. import data
 
 # Required properties
 
-@pytest.mark.skip(reason='fixed in ARIA-351')
 @pytest.mark.parametrize('name,type_name', itertools.product(
     data.TEMPLATE_NAMES,
     data.PARAMETER_TYPE_NAMES

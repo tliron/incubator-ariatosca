@@ -89,7 +89,6 @@ node_types:
 """).assert_failure()
 
 
-@pytest.mark.skip(reason='fixed in ARIA-351')
 def test_node_type_capability_type_override(parser):
     parser.parse_literal("""
 tosca_definitions_version: tosca_simple_yaml_1_0
@@ -252,7 +251,6 @@ node_types:
 """, dict(parameter_section=parameter_section)).assert_success()
 
 
-@pytest.mark.skip(reason='fixed in ARIA-351')
 @pytest.mark.parametrize('parameter_section', data.PARAMETER_SECTION_NAMES)
 def test_node_type_capability_parameter_type_override(parser, parameter_section):
     parser.parse_literal("""
@@ -260,7 +258,7 @@ tosca_definitions_version: tosca_simple_yaml_1_0
 data_types:
   MyType1: {}
   MyType2:
-    derived_from: {}
+    derived_from: MyType1
 capability_types:
   MyType:
     {{ parameter_section }}:
@@ -277,6 +275,7 @@ node_types:
 """, dict(parameter_section=parameter_section)).assert_success()
 
 
+@pytest.mark.skip(reason='fix')
 @pytest.mark.parametrize('parameter_section', data.PARAMETER_SECTION_NAMES)
 def test_node_type_capability_parameter_type_override_bad(parser, parameter_section):
     parser.parse_literal("""
@@ -284,7 +283,7 @@ tosca_definitions_version: tosca_simple_yaml_1_0
 data_types:
   MyType1: {}
   MyType2:
-    derived_from: {}
+    derived_from: MyType1
 capability_types:
   MyType:
     {{ parameter_section }}:

@@ -383,25 +383,26 @@ tosca_definitions_version: tosca_simple_yaml_1_0
 """, dict(name=name, parameter_section=parameter_section)).assert_success()
 
 
-@pytest.mark.skip(reason='fixed in ARIA-351')
 @pytest.mark.parametrize('name,parameter_section', data.PARAMETER_SECTIONS)
 def test_type_parameter_type_override(parser, name, parameter_section):
     parser.parse_literal("""
 tosca_definitions_version: tosca_simple_yaml_1_0
 data_types:
-  MyType1: {}
-  MyType2:
-    derived_from: MyType1
+  MyDataType1: {}
+  MyDataType2:
+    derived_from: MyDataType1
+{%- if name != 'data' %}
 {{ name }}_types:
+{%- endif %}
   MyType1:
     {{ parameter_section }}:
       my_parameter:
-        type: MyType1
+        type: MyDataType1
   MyType2:
     derived_from: MyType1
     {{ parameter_section }}:
       my_parameter:
-        type: MyType2
+        type: MyDataType2
 """, dict(name=name, parameter_section=parameter_section)).assert_success()
 
 
@@ -410,17 +411,19 @@ def test_type_parameter_type_override_bad(parser, name, parameter_section):
     parser.parse_literal("""
 tosca_definitions_version: tosca_simple_yaml_1_0
 data_types:
-  MyType1: {}
-  MyType2:
-    derived_from: MyType1
+  MyDataType1: {}
+  MyDataType2:
+    derived_from: MyDataType1
+{%- if name != 'data' %}
 {{ name }}_types:
+{%- endif %}
   MyType1:
     {{ parameter_section }}:
       my_parameter:
-        type: MyType2
+        type: MyDataType2
   MyType2:
     derived_from: MyType1
     {{ parameter_section }}:
       my_parameter:
-        type: MyType1
+        type: MyDataType1
 """, dict(name=name, parameter_section=parameter_section)).assert_failure()

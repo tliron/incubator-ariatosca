@@ -176,7 +176,7 @@ class Version(object):
 
     def __init__(self, entry_schema, constraints, value, aspect): # pylint: disable=unused-argument
         str_value = unicode(value)
-        match = re.match(Version.REGULAR, str_value, flags=re.UNICODE)
+        match = re.match(Version.REGEX, str_value, flags=re.UNICODE)
         if match is None:
             raise ValueError(
                 'version must be formatted as <major_version>.<minor_version>'
@@ -373,7 +373,7 @@ class Scalar(object):
 
     def __init__(self, entry_schema, constraints, value, aspect): # pylint: disable=unused-argument
         str_value = unicode(value)
-        match = re.match(self.REGULAR, str_value, flags=re.UNICODE) # pylint: disable=no-member
+        match = re.match(self.REGEX, str_value, flags=re.UNICODE) # pylint: disable=no-member
         if match is None:
             raise ValueError('scalar must be formatted as <scalar> <unit>: {0}'
                              .format(safe_repr(value)))

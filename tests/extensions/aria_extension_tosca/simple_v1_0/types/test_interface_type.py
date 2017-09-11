@@ -82,7 +82,6 @@ interface_types:
 """).assert_success()
 
 
-@pytest.mark.skip(reason='fixed in ARIA-351')
 def test_interface_type_inputs_type_override_derived(parser):
     parser.parse_literal("""
 tosca_definitions_version: tosca_simple_yaml_1_0

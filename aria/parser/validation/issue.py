@@ -102,33 +102,33 @@ class Issue(object):
         if self.location is not None:
             if self.line is not None:
                 if self.column is not None:
-                    return '"%s":%d:%d' % (self.location, self.line, self.column)
+                    return u'"{0}":{1:d}:{2:d}'.format(self.location, self.line, self.column)
                 else:
-                    return '"%s":%d' % (self.location, self.line)
+                    return u'"{0}":{1:d}'.format(self.location, self.line)
             else:
-                return '"%s"' % self.location
+                return u'"{0}"'.format(self.location)
         else:
             return None
 
     @property
     def heading_as_str(self):
-        return '%d: %s' % (self.level, self.message)
+        return u'{0:d}: {1}'.format(self.level, self.message)
 
     @property
     def details_as_str(self):
-        details_str = ''
+        details_str = u''
         locator = self.locator_as_str
         if locator is not None:
-            details_str += '@%s' % locator
+            details_str += u'@{0}'.format(locator)
         if self.snippet is not None:
-            details_str += '\n%s' % self.snippet
+            details_str += u'\n{0}'.format(self.snippet)
         return details_str
 
     def __str__(self):
         heading_str = self.heading_as_str
         details = self.details_as_str
         if details:
-            heading_str += ', ' + details
+            heading_str += u', ' + details
         return heading_str
 
 
@@ -149,7 +149,7 @@ class ReporterMixin(object):
         # Avoid duplicate issues
         with self._issues:
             for i in self._issues:
-                if str(i) == str(issue):
+                if unicode(i) == unicode(issue):
                     return
 
             self._issues.append(issue)

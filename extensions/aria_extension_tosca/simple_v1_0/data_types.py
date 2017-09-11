@@ -116,7 +116,7 @@ class Timestamp(object):
                                       Timezone(tzhour, tzminute))
             else:
                 raise ValueError(
-                    'timestamp must be formatted as YAML ISO8601 variant or "YYYY-MM-DD": {0}'
+                    u'timestamp must be formatted as YAML ISO8601 variant or "YYYY-MM-DD": {0}'
                     .format(safe_repr(value)))
 
     @property
@@ -129,8 +129,8 @@ class Timestamp(object):
 
     def __str__(self):
         the_datetime = self.as_datetime_utc
-        return '{0}{1}Z'.format(the_datetime.strftime(Timestamp.CANONICAL),
-                                Timestamp._fraction_as_str(the_datetime))
+        return u'{0}{1}Z'.format(the_datetime.strftime(Timestamp.CANONICAL),
+                                 Timestamp._fraction_as_str(the_datetime))
 
     def __repr__(self):
         return repr(self.__str__())
@@ -145,7 +145,7 @@ class Timestamp(object):
 
     @staticmethod
     def _fraction_as_str(the_datetime):
-        return '{0:g}'.format(the_datetime.microsecond / 1000000.0).lstrip('0')
+        return u'{0:g}'.format(the_datetime.microsecond / 1000000.0).lstrip('0')
 
 
 @total_ordering
@@ -179,8 +179,8 @@ class Version(object):
         match = re.match(Version.REGEX, str_value, flags=re.UNICODE)
         if match is None:
             raise ValueError(
-                'version must be formatted as <major_version>.<minor_version>'
-                '[.<fix_version>[.<qualifier>[-<build_version]]]: {0}'.format(safe_repr(value)))
+                u'version must be formatted as <major_version>.<minor_version>'
+                u'[.<fix_version>[.<qualifier>[-<build_version]]]: {0}'.format(safe_repr(value)))
 
         self.value = str_value
 
@@ -242,26 +242,26 @@ class Range(object):
 
     def __init__(self, entry_schema, constraints, value, aspect): # pylint: disable=unused-argument
         if not isinstance(value, list):
-            raise ValueError('range value is not a list: {0}'.format(safe_repr(value)))
+            raise ValueError(u'range value is not a list: {0}'.format(safe_repr(value)))
         if len(value) != 2:
-            raise ValueError('range value does not have exactly 2 elements: {0}'
+            raise ValueError(u'range value does not have exactly 2 elements: {0}'
                              .format(safe_repr(value)))
 
         def is_int(v):
             return isinstance(v, int) and (not isinstance(v, bool)) # In Python bool is an int
 
         if not is_int(value[0]):
-            raise ValueError('lower bound of range is not a valid integer: {0}'
+            raise ValueError(u'lower bound of range is not a valid integer: {0}'
                              .format(safe_repr(value[0])))
 
         if value[1] != 'UNBOUNDED':
             if not is_int(value[1]):
-                raise ValueError('upper bound of range is not a valid integer or "UNBOUNDED": {0}'
+                raise ValueError(u'upper bound of range is not a valid integer or "UNBOUNDED": {0}'
                                  .format(safe_repr(value[0])))
 
             if value[0] >= value[1]:
                 raise ValueError(
-                    'upper bound of range is not greater than the lower bound: {0} >= {1}'
+                    u'upper bound of range is not greater than the lower bound: {0} >= {1}'
                     .format(safe_repr(value[0]), safe_repr(value[1])))
 
         self.value = value
@@ -293,7 +293,7 @@ class List(list):
     @staticmethod
     def _create(context, presentation, entry_schema, constraints, value, aspect): # pylint: disable=unused-argument
         if not isinstance(value, list):
-            raise ValueError('"list" data type value is not a list: {0}'.format(safe_repr(value)))
+            raise ValueError(u'"list" data type value is not a list: {0}'.format(safe_repr(value)))
 
         entry_schema_type = entry_schema._get_type(context)
         entry_schema_constraints = entry_schema.constraints
@@ -327,10 +327,10 @@ class Map(StrictDict):
     @staticmethod
     def _create(context, presentation, entry_schema, constraints, value, aspect): # pylint: disable=unused-argument
         if not isinstance(value, dict):
-            raise ValueError('"map" data type value is not a dict: {0}'.format(safe_repr(value)))
+            raise ValueError(u'"map" data type value is not a dict: {0}'.format(safe_repr(value)))
 
         if entry_schema is None:
-            raise ValueError('"map" data type does not define "entry_schema"')
+            raise ValueError(u'"map" data type does not define "entry_schema"')
 
         entry_schema_type = entry_schema._get_type(context)
         entry_schema_constraints = entry_schema.constraints
@@ -375,7 +375,7 @@ class Scalar(object):
         str_value = unicode(value)
         match = re.match(self.REGEX, str_value, flags=re.UNICODE) # pylint: disable=no-member
         if match is None:
-            raise ValueError('scalar must be formatted as <scalar> <unit>: {0}'
+            raise ValueError(u'scalar must be formatted as <scalar> <unit>: {0}'
                              .format(safe_repr(value)))
 
         self.factor = float(match.group('scalar'))
@@ -392,7 +392,7 @@ class Scalar(object):
                 unit_size = v
                 break
         if unit_size is None:
-            raise ValueError('scalar specified with unsupported unit: {0}'
+            raise ValueError(u'scalar specified with unsupported unit: {0}'
                              .format(safe_repr(self.unit)))
 
         self.value = self.TYPE(self.factor * unit_size) # pylint: disable=no-member
@@ -406,7 +406,7 @@ class Scalar(object):
             ('unit_size', self.UNITS[self.unit]))) # pylint: disable=no-member
 
     def __str__(self):
-        return '{0} {1}'.format(self.value, self.UNIT) # pylint: disable=no-member
+        return u'{0} {1}'.format(self.value, self.UNIT) # pylint: disable=no-member
 
     def __repr__(self):
         return repr(self.__str__())

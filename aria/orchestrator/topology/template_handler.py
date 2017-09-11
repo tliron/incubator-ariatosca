@@ -69,7 +69,7 @@ class ServiceTemplate(common.TemplateHandlerBase):
                     plugin = plugin_specification.plugin
                     service.plugins[plugin.name] = plugin
                 else:
-                    self._topology.report('specified plugin not found: {0}'.format(
+                    self._topology.report(u'specified plugin not found: {0}'.format(
                         plugin_specification.name), level=self._topology.Issue.EXTERNAL)
         service.meta_data = self._topology.instantiate(self._model.meta_data)
 
@@ -117,8 +117,8 @@ class ServiceTemplate(common.TemplateHandlerBase):
                 scaling['default_instances'] > scaling['max_instances']
                ]):
             self._topology.report(
-                'invalid scaling parameters for node template "{0}": min={min_instances}, max='
-                '{max_instances}, default={default_instances}'.format(self._model.name, **scaling),
+                u'invalid scaling parameters for node template "{0}": min={min_instances}, max='
+                u'{max_instances}, default={default_instances}'.format(self._model.name, **scaling),
                 level=self._topology.Issue.BETWEEN_TYPES)
 
         return scaling
@@ -475,7 +475,7 @@ class SubstitutionTemplateMapping(common.TemplateHandlerBase):
         nodes = node_template.nodes
         if len(nodes) == 0:
             self._topology.report(
-                'mapping "{0}" refers to node template "{1}" but there are no node instances'.
+                u'mapping "{0}" refers to node template "{1}" but there are no node instances'.
                 format(self._model.mapped_name, self._model.node_template.name),
                 level=self._topology.Issue.BETWEEN_INSTANCES)
             return None
@@ -493,8 +493,8 @@ class SubstitutionTemplateMapping(common.TemplateHandlerBase):
     def validate(self, **_):
         if self._model.capability_template is None and self._model.requirement_template is None:
             self._topology.report(
-                'mapping "{0}" refers to neither capability nor a requirement '
-                'in node template: {1}'.format(
+                u'mapping "{0}" refers to neither capability nor a requirement '
+                u'in node template: {1}'.format(
                     self._model.name, formatting.safe_repr(self._model.node_template.name)),
                 level=self._topology.Issue.BETWEEN_TYPES)
 

@@ -43,7 +43,7 @@ class Concat(Function):
 
         if not isinstance(argument, list):
             raise InvalidValueError(
-                'function "concat" argument must be a list of string expressions: {0}'
+                u'function "concat" argument must be a list of string expressions: {0}'
                 .format(safe_repr(argument)),
                 locator=self.locator)
 
@@ -84,7 +84,7 @@ class Token(Function):
         self.locator = presentation._locator
 
         if (not isinstance(argument, list)) or (len(argument) != 3):
-            raise InvalidValueError('function "token" argument must be a list of 3 parameters: {0}'
+            raise InvalidValueError(u'function "token" argument must be a list of 3 parameters: {0}'
                                     .format(safe_repr(argument)),
                                     locator=self.locator)
 
@@ -143,7 +143,7 @@ class GetInput(Function):
                                                            'inputs', self.input_property_name)
             if the_input is None:
                 raise InvalidValueError(
-                    'function "get_input" argument is not a valid input name: {0}'
+                    u'function "get_input" argument is not a valid input name: {0}'
                     .format(safe_repr(argument)),
                     locator=self.locator)
 
@@ -162,7 +162,7 @@ class GetInput(Function):
             return Evaluation(value, False) # We never return final evaluations!
 
         raise InvalidValueError(
-            'function "get_input" argument is not a valid input name: {0}'
+            u'function "get_input" argument is not a valid input name: {0}'
             .format(safe_repr(self.input_property_name)),
             locator=self.locator)
 
@@ -179,8 +179,8 @@ class GetProperty(Function):
 
         if (not isinstance(argument, list)) or (len(argument) < 2):
             raise InvalidValueError(
-                'function "get_property" argument must be a list of at least 2 string expressions: '
-                '{0}'.format(safe_repr(argument)),
+                u'function "get_property" argument must be a list of at least 2 string expressions:'
+                u' {0}'.format(safe_repr(argument)),
                 locator=self.locator)
 
         self.modelable_entity_name = parse_modelable_entity_name(context, presentation,
@@ -230,8 +230,8 @@ class GetProperty(Function):
                 return evaluation
 
         raise InvalidValueError(
-            'function "get_property" could not find "{0}" in modelable entity "{1}"'
-            .format('.'.join(self.nested_property_name_or_index), self.modelable_entity_name),
+            u'function "get_property" could not find "{0}" in modelable entity "{1}"'
+            .format(u'.'.join(self.nested_property_name_or_index), self.modelable_entity_name),
             locator=self.locator)
 
 
@@ -251,8 +251,8 @@ class GetAttribute(Function):
 
         if (not isinstance(argument, list)) or (len(argument) < 2):
             raise InvalidValueError(
-                'function "get_attribute" argument must be a list of at least 2 string expressions:'
-                ' {0}'.format(safe_repr(argument)),
+                u'function "get_attribute" argument must be a list of at least 2 string '
+                u'expressions: {0}'.format(safe_repr(argument)),
                 locator=self.locator)
 
         self.modelable_entity_name = parse_modelable_entity_name(context, presentation,
@@ -277,8 +277,8 @@ class GetAttribute(Function):
                 return evaluation
 
         raise InvalidValueError(
-            'function "get_attribute" could not find "{0}" in modelable entity "{1}"'
-            .format('.'.join(self.nested_attribute_name_or_index), self.modelable_entity_name),
+            u'function "get_attribute" could not find "{0}" in modelable entity "{1}"'
+            .format(u'.'.join(self.nested_attribute_name_or_index), self.modelable_entity_name),
             locator=self.locator)
 
 
@@ -298,7 +298,7 @@ class GetOperationOutput(Function):
 
         if (not isinstance(argument, list)) or (len(argument) != 4):
             raise InvalidValueError(
-                'function "get_operation_output" argument must be a list of 4 parameters: {0}'
+                u'function "get_operation_output" argument must be a list of 4 parameters: {0}'
                 .format(safe_repr(argument)),
                 locator=self.locator)
 
@@ -349,7 +349,7 @@ class GetNodesOfType(Function):
             node_types = context.presentation.get('service_template', 'node_types')
             if (node_types is None) or (self.node_type_name not in node_types):
                 raise InvalidValueError(
-                    'function "get_nodes_of_type" argument is not a valid node type name: {0}'
+                    u'function "get_nodes_of_type" argument is not a valid node type name: {0}'
                     .format(safe_repr(argument)),
                     locator=self.locator)
 
@@ -380,7 +380,7 @@ class GetArtifact(Function):
 
         if (not isinstance(argument, list)) or (len(argument) < 2) or (len(argument) > 4):
             raise InvalidValueError(
-                'function "get_artifact" argument must be a list of 2 to 4 parameters: {0}'
+                u'function "get_artifact" argument must be a list of 2 to 4 parameters: {0}'
                 .format(safe_repr(argument)),
                 locator=self.locator)
 
@@ -475,7 +475,7 @@ def parse_modelable_entity_name(context, presentation, name, index, value):
             or {}
         if (value not in node_templates) and (value not in relationship_templates):
             raise InvalidValueError(
-                'function "{0}" parameter {1:d} is not a valid modelable entity name: {2}'
+                u'function "{0}" parameter {1:d} is not a valid modelable entity name: {2}'
                 .format(name, index + 1, safe_repr(value)),
                 locator=presentation._locator, level=Issue.BETWEEN_TYPES)
     return value
@@ -548,7 +548,7 @@ def get_modelable_entities(container_holder, name, locator, modelable_entity_nam
 
         return modelable_entities
 
-    raise InvalidValueError('function "{0}" could not find modelable entity "{1}"'
+    raise InvalidValueError(u'function "{0}" could not find modelable entity "{1}"'
                             .format(name, modelable_entity_name),
                             locator=locator)
 
@@ -564,9 +564,9 @@ def get_self(container_holder, name, locator):
         (not isinstance(container, NodeTemplate)) and \
         (not isinstance(container, Relationship)) and \
         (not isinstance(container, RelationshipTemplate)):
-        raise InvalidValueError('function "{0}" refers to "SELF" but it is not contained in '
-                                'a node or a relationship: {1}'.format(name,
-                                                                       full_type_name(container)),
+        raise InvalidValueError(u'function "{0}" refers to "SELF" but it is not contained in '
+                                u'a node or a relationship: {1}'.format(name,
+                                                                        full_type_name(container)),
                                 locator=locator)
 
     return [container]
@@ -586,8 +586,8 @@ def get_hosts(container_holder, name, locator):
 
     container = container_holder.container
     if (not isinstance(container, Node)) and (not isinstance(container, NodeTemplate)):
-        raise InvalidValueError('function "{0}" refers to "HOST" but it is not contained in '
-                                'a node: {1}'.format(name, full_type_name(container)),
+        raise InvalidValueError(u'function "{0}" refers to "HOST" but it is not contained in '
+                                u'a node: {1}'.format(name, full_type_name(container)),
                                 locator=locator)
 
     if not isinstance(container, Node):
@@ -611,8 +611,8 @@ def get_source(container_holder, name, locator):
     container = container_holder.container
     if (not isinstance(container, Relationship)) and \
         (not isinstance(container, RelationshipTemplate)):
-        raise InvalidValueError('function "{0}" refers to "SOURCE" but it is not contained in '
-                                'a relationship: {1}'.format(name, full_type_name(container)),
+        raise InvalidValueError(u'function "{0}" refers to "SOURCE" but it is not contained in '
+                                u'a relationship: {1}'.format(name, full_type_name(container)),
                                 locator=locator)
 
     if not isinstance(container, RelationshipTemplate):
@@ -631,8 +631,8 @@ def get_target(container_holder, name, locator):
     container = container_holder.container
     if (not isinstance(container, Relationship)) and \
         (not isinstance(container, RelationshipTemplate)):
-        raise InvalidValueError('function "{0}" refers to "TARGET" but it is not contained in '
-                                'a relationship: {1}'.format(name, full_type_name(container)),
+        raise InvalidValueError(u'function "{0}" refers to "TARGET" but it is not contained in '
+                                u'a relationship: {1}'.format(name, full_type_name(container)),
                                 locator=locator)
 
     if not isinstance(container, RelationshipTemplate):
@@ -665,17 +665,17 @@ def get_modelable_entity_parameter(modelable_entity, parameters, nested_paramete
 
 
 def invalid_modelable_entity_name(name, index, value, locator, contexts):
-    return InvalidValueError('function "{0}" parameter {1:d} can be "{2}" only in {3}'
+    return InvalidValueError(u'function "{0}" parameter {1:d} can be "{2}" only in {3}'
                              .format(name, index + 1, value, contexts),
                              locator=locator, level=Issue.FIELD)
 
 
 def invalid_value(name, index, the_type, explanation, value, locator):
     return InvalidValueError(
-        'function "{0}" {1} is not {2}{3}: {4}'
+        u'function "{0}" {1} is not {2}{3}: {4}'
         .format(name,
-                'parameter {0:d}'.format(index + 1) if index is not None else 'argument',
+                u'parameter {0:d}'.format(index + 1) if index is not None else 'argument',
                 the_type,
-                ', {0}'.format(explanation) if explanation is not None else '',
+                u', {0}'.format(explanation) if explanation is not None else '',
                 safe_repr(value)),
         locator=locator, level=Issue.FIELD)

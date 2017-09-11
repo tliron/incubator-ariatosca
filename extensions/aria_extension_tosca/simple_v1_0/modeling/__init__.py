@@ -400,7 +400,7 @@ def create_operation_template_model(context, service_template, operation):
                         value = yaml.load(value)
                     except yaml.parser.MarkedYAMLError as e:
                         context.validation.report(
-                            'YAML parser {0} in operation configuration: {1}'
+                            u'YAML parser {0} in operation configuration: {1}'
                             .format(e.problem, value),
                             locator=implementation._locator,
                             level=Issue.FIELD)
@@ -519,7 +519,7 @@ def create_workflow_operation_template_model(context, service_template, policy):
 
     used_reserved_names = WORKFLOW_DECORATOR_RESERVED_ARGUMENTS.intersection(model.inputs.keys())
     if used_reserved_names:
-        context.validation.report('using reserved arguments in workflow policy "{0}": {1}'
+        context.validation.report(u'using reserved arguments in workflow policy "{0}": {1}'
                                   .format(
                                       policy._name,
                                       string_list_as_string(used_reserved_names)),
@@ -696,7 +696,7 @@ def create_constraint(context, node_filter, constraint_clause, property_name, ca
         return Pattern(property_name, capability_name,
                        coerce_constraint(constraint_clause.pattern))
     else:
-        raise ValueError('malformed node_filter: {0}'.format(constraint_key))
+        raise ValueError(u'malformed node_filter: {0}'.format(constraint_key))
 
 
 def split_prefix(string):
@@ -741,7 +741,7 @@ def extract_implementation_primary(context, service_template, presentation, mode
         model.function = postfix
         if model.plugin_specification is None:
             context.validation.report(
-                'no policy for plugin "{0}" specified in operation implementation: {1}'
+                u'no policy for plugin "{0}" specified in operation implementation: {1}'
                 .format(prefix, primary),
                 locator=presentation._get_child_locator('properties', 'implementation'),
                 level=Issue.BETWEEN_TYPES)

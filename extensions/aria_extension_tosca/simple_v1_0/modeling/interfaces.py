@@ -177,8 +177,8 @@ def get_template_interfaces(context, presentation, type_name):
                                 our_interface_assignment, interface_definition, interface_name)
             else:
                 context.validation.report(
-                    'interface definition "%s" not declared at %s "%s" in "%s"'
-                    % (interface_name, type_name, presentation.type, presentation._fullname),
+                    u'interface definition "{0}" not declared at {1} "{2}" in "{3}"'
+                    .format(interface_name, type_name, presentation.type, presentation._fullname),
                     locator=our_interface_assignment._locator, level=Issue.BETWEEN_TYPES)
 
     # Check that there are no required inputs that we haven't assigned
@@ -272,8 +272,8 @@ def merge_interface(context, presentation, interface_assignment, our_interface_a
 
             if operation_definition is None:
                 context.validation.report(
-                    'interface definition "%s" refers to an unknown operation "%s" in "%s"'
-                    % (interface_name, operation_name, presentation._fullname),
+                    u'interface definition "{0}" refers to an unknown operation "{1}" in "{2}"'
+                    .format(interface_name, operation_name, presentation._fullname),
                     locator=our_operation_template._locator, level=Issue.BETWEEN_TYPES)
 
             if (our_input_assignments is not None) or (our_implementation is not None):
@@ -303,15 +303,16 @@ def merge_raw_input_definition(context, the_raw_input, our_input, interface_name
     if input_type1 != input_type2:
         if operation_name is not None:
             context.validation.report(
-                'interface %s "%s" changes operation input "%s.%s" type from "%s" to "%s" in "%s"'
-                % (type_name, interface_name, operation_name, our_input._name, input_type1,
-                   input_type2, presentation._fullname),
+                u'interface {0} "{1}" changes operation input "{2}.{3}" type from "{4}" to "{5}" '
+                u'in "{6}"'
+                .format(type_name, interface_name, operation_name, our_input._name, input_type1,
+                        input_type2, presentation._fullname),
                 locator=input_type2._locator, level=Issue.BETWEEN_TYPES)
         else:
             context.validation.report(
-                'interface %s "%s" changes input "%s" type from "%s" to "%s" in "%s"'
-                % (type_name, interface_name, our_input._name, input_type1, input_type2,
-                   presentation._fullname),
+                u'interface {0} "{1}" changes input "{2}" type from "{3}" to "{4}" in "{5}"'
+                .format(type_name, interface_name, our_input._name, input_type1, input_type2,
+                        presentation._fullname),
                 locator=input_type2._locator, level=Issue.BETWEEN_TYPES)
 
     # Merge
@@ -405,8 +406,8 @@ def merge_interface_definition(context, interface, our_source, presentation, typ
 
         if (type2 is not None) and not type1._is_descendant(context, type2):
             context.validation.report(
-                'interface definition type "{0}" is not a descendant of overridden '
-                'interface definition type "{1}"' \
+                u'interface definition type "{0}" is not a descendant of overridden '
+                u'interface definition type "{1}"' \
                 .format(type1._name, type2._name),
                 locator=our_source._locator, level=Issue.BETWEEN_TYPES)
 
@@ -462,14 +463,14 @@ def assign_raw_inputs(context, values, assignments, definitions, interface_name,
         if (definitions is not None) and (input_name not in definitions):
             if operation_name is not None:
                 context.validation.report(
-                    'interface definition "%s" assigns a value to an unknown operation input'
-                    ' "%s.%s" in "%s"'
-                    % (interface_name, operation_name, input_name, presentation._fullname),
+                    u'interface definition "{0}" assigns a value to an unknown operation input'
+                    u' "{1}.{2}" in "{3}"'
+                    .format(interface_name, operation_name, input_name, presentation._fullname),
                     locator=assignment._locator, level=Issue.BETWEEN_TYPES)
             else:
                 context.validation.report(
-                    'interface definition "%s" assigns a value to an unknown input "%s" in "%s"'
-                    % (interface_name, input_name, presentation._fullname),
+                    u'interface definition "{0}" assigns a value to an unknown input "{1}" in "{2}"'
+                    .format(interface_name, input_name, presentation._fullname),
                     locator=assignment._locator, level=Issue.BETWEEN_TYPES)
 
         definition = definitions.get(input_name) if definitions is not None else None
@@ -498,16 +499,17 @@ def validate_required_inputs(context, presentation, assignment, definition, orig
                 if value is None:
                     if operation_name is not None:
                         context.validation.report(
-                            'interface definition "%s" does not assign a value to a required'
-                            ' operation input "%s.%s" in "%s"'
-                            % (interface_name, operation_name, input_name, presentation._fullname),
+                            u'interface definition "{0}" does not assign a value to a required'
+                            u' operation input "{1}.{2}" in "{3}"'
+                            .format(interface_name, operation_name, input_name,
+                                    presentation._fullname),
                             locator=get_locator(original_assignment, presentation._locator),
                             level=Issue.BETWEEN_TYPES)
                     else:
                         context.validation.report(
-                            'interface definition "%s" does not assign a value to a required input'
-                            ' "%s" in "%s"'
-                            % (interface_name, input_name, presentation._fullname),
+                            u'interface definition "{0}" does not assign a value to a required'
+                            u' input "{1}" in "{2}"'
+                            .format(interface_name, input_name, presentation._fullname),
                             locator=get_locator(original_assignment, presentation._locator),
                             level=Issue.BETWEEN_TYPES)
 

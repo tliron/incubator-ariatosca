@@ -73,8 +73,8 @@ def get_inherited_capability_definitions(context, presentation, for_presentation
 
                 if not type1._is_descendant(context, type2):
                     context.validation.report(
-                        'capability definition type "{0}" is not a descendant of overridden '
-                        'capability definition type "{1}"' \
+                        u'capability definition type "{0}" is not a descendant of overridden '
+                        u'capability definition type "{1}"' \
                         .format(type1._name, type2._name),
                         locator=our_capability_definition._locator, level=Issue.BETWEEN_TYPES)
 
@@ -141,7 +141,7 @@ def get_template_capabilities(context, presentation):
                     capability_assignment._reset_method_cache()
             else:
                 context.validation.report(
-                    'capability "{0}" not declared at node type "{1}" in "{2}"'
+                    u'capability "{0}" not declared at node type "{1}" in "{2}"'
                     .format(capability_name, presentation.type, presentation._fullname),
                     locator=our_capability_assignment._locator, level=Issue.BETWEEN_TYPES)
 

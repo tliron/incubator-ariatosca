@@ -134,7 +134,7 @@ class Node(common.ActorHandlerBase):
     def validate(self, **kwargs):
         if len(self._model.name) > context.ID_MAX_LENGTH:
             self._topology.report(
-                '"{0}" has an ID longer than the limit of {1:d} characters: {2:d}'.format(
+                u'"{0}" has an ID longer than the limit of {1:d} characters: {2:d}'.format(
                     self._model.name, context.ID_MAX_LENGTH, len(self._model.name)),
                 level=self._topology.Issue.BETWEEN_INSTANCES)
 
@@ -170,11 +170,11 @@ class Node(common.ActorHandlerBase):
         for capability in self._model.capabilities.itervalues():
             if not capability.has_enough_relationships:
                 self._topology.report(
-                    'capability "{0}" of node "{1}" requires at least {2:d} '
-                    'relationships but has {3:d}'.format(capability.name,
-                                                         self._model.name,
-                                                         capability.min_occurrences,
-                                                         capability.occurrences),
+                    u'capability "{0}" of node "{1}" requires at least {2:d} '
+                    u'relationships but has {3:d}'.format(capability.name,
+                                                          self._model.name,
+                                                          capability.min_occurrences,
+                                                          capability.occurrences),
                     level=self._topology.Issue.BETWEEN_INSTANCES)
                 satisfied = False
         return satisfied
@@ -197,8 +197,8 @@ class Node(common.ActorHandlerBase):
                 satisfied = self._satisfy_capability(
                     target_node_capability, target_node_template, requirement_template)
             else:
-                self._topology.report('requirement "{0}" of node "{1}" has no target node template'.
-                                      format(requirement_template.name, self._model.name),
+                self._topology.report(u'requirement "{0}" of node "{1}" has no target node template'
+                                      .format(requirement_template.name, self._model.name),
                                       level=self._topology.Issue.BETWEEN_INSTANCES)
                 satisfied = False
         return satisfied
@@ -237,16 +237,16 @@ class Node(common.ActorHandlerBase):
                 return True
             else:
                 self._topology.report(
-                    'requirement "{0}" of node "{1}" targets node '
-                    'template "{2}" but its instantiated nodes do not '
-                    'have enough capacity'.format(
+                    u'requirement "{0}" of node "{1}" targets node '
+                    u'template "{2}" but its instantiated nodes do not '
+                    u'have enough capacity'.format(
                         requirement_template.name, self._model.name, target_node_template.name),
                     level=self._topology.Issue.BETWEEN_INSTANCES)
                 return False
         else:
             self._topology.report(
-                'requirement "{0}" of node "{1}" targets node template '
-                '"{2}" but it has no instantiated nodes'.format(
+                u'requirement "{0}" of node "{1}" targets node template '
+                u'"{2}" but it has no instantiated nodes'.format(
                     requirement_template.name, self._model.name, target_node_template.name),
                 level=self._topology.Issue.BETWEEN_INSTANCES)
             return False
@@ -258,8 +258,8 @@ class Node(common.ActorHandlerBase):
             if not self._model.node_template.is_target_node_template_valid(
                     requirement_template.target_node_template):
                 self._topology.report(
-                    'requirement "{0}" of node template "{1}" is for node '
-                    'template "{2}" but it does not match constraints'.format(
+                    u'requirement "{0}" of node template "{1}" is for node '
+                    u'template "{2}" but it does not match constraints'.format(
                         requirement_template.name,
                         requirement_template.target_node_template.name,
                         self._model.node_template.name),
@@ -418,7 +418,7 @@ class Operation(common.ActorHandlerBase):
             self._model.arguments.keys())
         if used_reserved_names:
             self._topology.report(
-                'using reserved arguments in operation "{0}": {1}'.format(
+                u'using reserved arguments in operation "{0}": {1}'.format(
                     self._model.name, formatting.string_list_as_string(used_reserved_names)),
                 level=self._topology.Issue.EXTERNAL)
 
@@ -562,8 +562,8 @@ class SubstitutionMapping(common.InstanceHandlerBase):
     def validate(self, **_):
         if (self._model.capability is None) and (self._model.requirement_template is None):
             self._topology.report(
-                'mapping "{0}" refers to neither capability nor a requirement'
-                ' in node: {1}'.format(
+                u'mapping "{0}" refers to neither capability nor a requirement'
+                u' in node: {1}'.format(
                     self._model.name, formatting.safe_repr(self._model.node_style.name)),
                 level=self._topology.Issue.BETWEEN_TYPES)
 

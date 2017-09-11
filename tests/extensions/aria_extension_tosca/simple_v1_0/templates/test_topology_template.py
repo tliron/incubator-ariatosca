@@ -43,12 +43,18 @@ node_types:
   MyType: {}
 topology_template:
   description: a description
-  inputs: {}
-  node_templates: {}
-  relationship_templates: {}
-  groups: {}
-  policies: {}
-  outputs: {}
   substitution_mappings:
     node_type: MyType
+""").assert_success()
+
+
+def test_topology_template_fields_unicode(parser):
+    parser.parse_literal("""
+tosca_definitions_version: tosca_simple_yaml_1_0
+node_types:
+  類型: {}
+topology_template:
+  description: 描述
+  substitution_mappings:
+    node_type: 類型
 """).assert_success()

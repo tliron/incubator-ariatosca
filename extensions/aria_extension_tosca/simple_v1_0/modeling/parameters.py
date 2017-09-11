@@ -88,7 +88,7 @@ def get_assigned_and_defined_parameter_values(context, presentation, field_name)
                 definition = definitions[name]
                 values[name] = coerce_parameter_value(context, value, definition, value.value)
             else:
-                context.validation.report('assignment to undefined {0} "{1}" in "{2}"'
+                context.validation.report(u'assignment to undefined {0} "{1}" in "{2}"'
                                           .format(field_name, name, presentation._fullname),
                                           locator=value._locator, level=Issue.BETWEEN_TYPES)
 
@@ -150,7 +150,7 @@ def validate_required_values(context, presentation, values, definitions):
     for name, definition in definitions.iteritems():
         if getattr(definition, 'required', False) \
             and ((values is None) or (values.get(name) is None)):
-            context.validation.report('required property "{0}" is not assigned a value in "{1}"'
+            context.validation.report(u'required property "{0}" is not assigned a value in "{1}"'
                                       .format(name, presentation._fullname),
                                       locator=presentation._get_child_locator('properties'),
                                       level=Issue.BETWEEN_TYPES)
@@ -169,8 +169,8 @@ def merge_raw_parameter_definition(context, presentation, raw_property_definitio
     if type1 != type2:
         if not hasattr(type1, '_is_descendant') or not type1._is_descendant(context, type2):
             context.validation.report(
-                'property definition type "{0}" is not a descendant of overridden '
-                'property definition type "{1}"' \
+                u'property definition type "{0}" is not a descendant of overridden '
+                u'property definition type "{1}"' \
                 .format(type1_name, type2._name),
                 locator=presentation._get_child_locator(field_name, property_name),
                 level=Issue.BETWEEN_TYPES)

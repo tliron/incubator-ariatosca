@@ -32,7 +32,7 @@ class ReaderSource(object):
 
     @staticmethod
     def get_reader(context, location, loader):  # pylint: disable=unused-argument
-        raise ReaderNotFoundError('location: %s' % location)
+        raise ReaderNotFoundError(u'location: {0}'.format(location))
 
 
 class DefaultReaderSource(ReaderSource):

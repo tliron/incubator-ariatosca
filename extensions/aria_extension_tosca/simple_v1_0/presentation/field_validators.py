@@ -52,7 +52,7 @@ def copy_validator(template_type_name, templates_dict_name):
             else:
                 if copy.copy is not None:
                     context.validation.report(
-                        '"copy" field refers to a {0} that itself is a copy in "{1}": {2}'
+                        u'"copy" field refers to a {0} that itself is a copy in "{1}": {2}'
                         .format(template_type_name, presentation._fullname, safe_repr(value)),
                         locator=presentation._locator, level=Issue.BETWEEN_TYPES)
 
@@ -84,7 +84,7 @@ def data_type_validator(type_name='data type'):
             container_data_type = get_container_data_type(presentation)
             if (container_data_type is not None) and (container_data_type._name == value):
                 context.validation.report(
-                    'type of property "{0}" creates a circular value hierarchy: {1}'
+                    u'type of property "{0}" creates a circular value hierarchy: {1}'
                     .format(presentation._fullname, safe_repr(value)),
                     locator=presentation._get_child_locator('type'), level=Issue.BETWEEN_TYPES)
 
@@ -135,13 +135,13 @@ def entry_schema_validator(field, presentation, context):
     if use_entry_schema:
         if value is None:
             context.validation.report(
-                '"entry_schema" does not have a value as required by data type "{0}" in "{1}"'
+                u'"entry_schema" does not have a value as required by data type "{0}" in "{1}"'
                 .format(get_data_type_name(the_type), presentation._container._fullname),
                 locator=presentation._locator, level=Issue.BETWEEN_TYPES)
     else:
         if value is not None:
             context.validation.report(
-                '"entry_schema" has a value but it is not used by data type "{0}" in "{1}"'
+                u'"entry_schema" has a value but it is not used by data type "{0}" in "{1}"'
                 .format(get_data_type_name(the_type), presentation._container._fullname),
                 locator=presentation._locator, level=Issue.BETWEEN_TYPES)
 
@@ -201,7 +201,7 @@ def data_type_constraints_validator(field, presentation, context):
     if value is not None:
         if presentation._get_primitive_ancestor(context) is None:
             context.validation.report(
-                'data type "{0}" defines constraints but does not have a primitive ancestor'
+                u'data type "{0}" defines constraints but does not have a primitive ancestor'
                 .format(presentation._fullname),
                 locator=presentation._get_child_locator(field.name), level=Issue.BETWEEN_TYPES)
 
@@ -220,7 +220,7 @@ def data_type_properties_validator(field, presentation, context):
     if values is not None:
         if presentation._get_primitive_ancestor(context) is not None:
             context.validation.report(
-                'data type "{0}" defines properties even though it has a primitive ancestor'
+                u'data type "{0}" defines properties even though it has a primitive ancestor'
                 .format(presentation._fullname),
                 locator=presentation._get_child_locator(field.name), level=Issue.BETWEEN_TYPES)
 
@@ -275,14 +275,14 @@ def constraint_clause_in_range_validator(field, presentation, context):
                 # Second "in_range" value must be greater or equal than first
                 if (lower is not None) and (upper is not None) and (lower >= upper):
                     context.validation.report(
-                        'upper bound of "in_range" constraint is not greater than the lower bound'
-                        ' in "{0}": {1} <= {2}'
+                        u'upper bound of "in_range" constraint is not greater than the lower bound'
+                        u' in "{0}": {1} <= {2}'
                         .format(presentation._container._fullname, safe_repr(lower),
                                 safe_repr(upper)),
                         locator=presentation._locator, level=Issue.FIELD)
         else:
             context.validation.report(
-                'constraint "{0}" is not a list of exactly 2 elements in "{1}": {2}'
+                u'constraint "{0}" is not a list of exactly 2 elements in "{1}": {2}'
                 .format(field.name, presentation._fullname, safe_repr(values)),
                 locator=presentation._get_child_locator(field.name), level=Issue.FIELD)
 
@@ -326,7 +326,7 @@ def constraint_clause_pattern_validator(field, presentation, context):
             re.compile(value)
         except re.error as e:
             context.validation.report(
-                'constraint "{0}" is not a valid regular expression in "{1}": {2}'
+                u'constraint "{0}" is not a valid regular expression in "{1}": {2}'
                 .format(field.name, presentation._fullname, safe_repr(value)),
                 locator=presentation._get_child_locator(field.name), level=Issue.FIELD, exception=e)
 
@@ -380,20 +380,20 @@ def capability_definition_or_type_validator(field, presentation, context):
         if get_type_by_name(context, value, 'capability_types') is not None:
             if node is not None:
                 context.validation.report(
-                    '"{0}" refers to a capability type even though "node" has a value in "{1}"'
+                    u'"{0}" refers to a capability type even though "node" has a value in "{1}"'
                     .format(presentation._name, presentation._container._fullname),
                     locator=presentation._get_child_locator(field.name), level=Issue.BETWEEN_FIELDS)
             return
 
         if node_variant == 'node_template':
             context.validation.report(
-                'requirement "{0}" refers to an unknown capability definition name or capability'
-                ' type in "{1}": {2}'
+                u'requirement "{0}" refers to an unknown capability definition name or capability'
+                u' type in "{1}": {2}'
                 .format(presentation._name, presentation._container._fullname, safe_repr(value)),
                 locator=presentation._get_child_locator(field.name), level=Issue.BETWEEN_TYPES)
         else:
             context.validation.report(
-                'requirement "{0}" refers to an unknown capability type in "{1}": {2}'
+                u'requirement "{0}" refers to an unknown capability type in "{1}": {2}'
                 .format(presentation._name, presentation._container._fullname, safe_repr(value)),
                 locator=presentation._get_child_locator(field.name), level=Issue.BETWEEN_TYPES)
 
@@ -413,8 +413,8 @@ def node_filter_validator(field, presentation, context):
         _, node_type_variant = presentation._get_node(context)
         if node_type_variant != 'node_type':
             context.validation.report(
-                'requirement "{0}" has a node filter even though "node" does not refer to a node'
-                ' type in "{1}"'
+                u'requirement "{0}" has a node filter even though "node" does not refer to a node'
+                u' type in "{1}"'
                 .format(presentation._fullname, presentation._container._fullname),
                 locator=presentation._locator, level=Issue.BETWEEN_FIELDS)
 
@@ -520,8 +520,8 @@ def policy_targets_validator(field, presentation, context):
 
             if not is_valid:
                 context.validation.report(
-                    'policy definition target does not match either a node type or a group type'
-                    ' declared in the policy type in "{0}": {1}'
+                    u'policy definition target does not match either a node type or a group type'
+                    u' declared in the policy type in "{0}": {1}'
                     .format(presentation._name, safe_repr(value)),
                     locator=presentation._locator, level=Issue.BETWEEN_TYPES)
 
@@ -548,7 +548,7 @@ def node_filter_properties_validator(field, presentation, context):
             for name, _ in values:
                 if name not in properties:
                     context.validation.report(
-                        'node filter refers to an unknown property definition in "{0}": {1}'
+                        u'node filter refers to an unknown property definition in "{0}": {1}'
                         .format(node_type._name, name),
                         locator=presentation._locator, level=Issue.BETWEEN_TYPES)
 
@@ -578,12 +578,12 @@ def node_filter_capabilities_validator(field, presentation, context):
                         for property_name, _ in properties:
                             if property_name not in capability_properties:
                                 context.validation.report(
-                                    'node filter refers to an unknown capability definition'
-                                    ' property in "{0}": {1}'
+                                    u'node filter refers to an unknown capability definition'
+                                    u' property in "{0}": {1}'
                                     .format(node_type._name, property_name),
                                     locator=presentation._locator, level=Issue.BETWEEN_TYPES)
                 else:
                     context.validation.report(
-                        'node filter refers to an unknown capability definition in "{0}": {1}'
+                        u'node filter refers to an unknown capability definition in "{0}": {1}'
                         .format(node_type._name, name),
                         locator=presentation._locator, level=Issue.BETWEEN_TYPES)

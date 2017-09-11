@@ -233,8 +233,9 @@ class AsIsPresentation(PresentationBase):
         try:
             validate_primitive(self._raw, self.cls, context.validation.allow_primitive_coersion)
         except ValueError as e:
-            context.validation.report('"%s" is not a valid "%s": %s'
-                                      % (self._fullname, self._full_cls_name, safe_repr(self._raw)),
+            context.validation.report(u'"{0}" is not a valid "{1}": {2}'
+                                      .format(self._fullname, self._full_cls_name,
+                                              safe_repr(self._raw)),
                                       locator=self._locator,
                                       level=Issue.FIELD,
                                       exception=e)

@@ -106,12 +106,12 @@ class YamlReader(Reader):
             line = e.problem_mark.line
             column = e.problem_mark.column
             snippet = e.problem_mark.get_snippet()
-            raise ReaderSyntaxError('YAML %s: %s %s' %
-                                    (e.__class__.__name__, problem, context),
+            raise ReaderSyntaxError(u'YAML {0}: {1} {2}'
+                                    .format(e.__class__.__name__, problem, context),
                                     location=self.loader.location,
                                     line=line,
                                     column=column,
                                     snippet=snippet,
                                     cause=e)
         except Exception as e:
-            raise ReaderSyntaxError('YAML: %s' % e, cause=e)
+            raise ReaderSyntaxError(u'YAML: {0}'.format(e), cause=e)

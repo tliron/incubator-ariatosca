@@ -32,12 +32,12 @@ class Reader(object):
                 with self.context._locations:
                     for location in self.context._locations:
                         if location.is_equivalent(loader.location):
-                            raise AlreadyReadException('already read: %s' % loader.location)
+                            raise AlreadyReadException(u'already read: {0}'.format(loader.location))
                     self.context._locations.append(loader.location)
 
             data = loader.load()
             if data is None:
-                raise ReaderException('loader did not provide data: %s' % loader)
+                raise ReaderException(u'loader did not provide data: {0}'.format(loader))
             return data
 
     def read(self):

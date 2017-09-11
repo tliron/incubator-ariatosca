@@ -107,24 +107,25 @@ def get_template_requirements(context, presentation):
                     requirement_assignments.append((requirement_name, requirement_assignment))
                 elif actual_occurrences > 1:
                     context.validation.report(
-                        'requirement "%s" is allowed only one occurrence in "%s": %d'
-                        % (requirement_name, presentation._fullname, actual_occurrences),
+                        u'requirement "{0}" is allowed only one occurrence in "{1}": {2:d}'
+                        .format(requirement_name, presentation._fullname, actual_occurrences),
                         locator=presentation._locator, level=Issue.BETWEEN_TYPES)
             else:
                 if not allowed_occurrences.is_in(actual_occurrences):
                     if allowed_occurrences.value[1] == 'UNBOUNDED':
                         context.validation.report(
-                            'requirement "%s" does not have at least %d occurrences in "%s": has %d'
-                            % (requirement_name, allowed_occurrences.value[0],
-                               presentation._fullname, actual_occurrences),
+                            u'requirement "{0}" does not have at least {1:d} occurrences in "{3}":'
+                            u' has {4:d}'
+                            .format(requirement_name, allowed_occurrences.value[0],
+                                    presentation._fullname, actual_occurrences),
                             locator=presentation._locator, level=Issue.BETWEEN_TYPES)
                     else:
                         context.validation.report(
-                            'requirement "%s" is allowed between %d and %d occurrences in "%s":'
-                            ' has %d'
-                            % (requirement_name, allowed_occurrences.value[0],
-                               allowed_occurrences.value[1], presentation._fullname,
-                               actual_occurrences),
+                            u'requirement "{0}" is allowed between {1:d} and {2:d} occurrences in'
+                            u' "{3}": has {4:d}'
+                            .format(requirement_name, allowed_occurrences.value[0],
+                                    allowed_occurrences.value[1], presentation._fullname,
+                                    actual_occurrences),
                             locator=presentation._locator, level=Issue.BETWEEN_TYPES)
 
     return requirement_assignments
@@ -174,9 +175,9 @@ def convert_requirement_from_definition_to_assignment(context, requirement_defin
         # Make sure the type is derived
         if not definition_relationship_type._is_descendant(context, relationship_type):
             context.validation.report(
-                'assigned relationship type "%s" is not a descendant of declared relationship type'
-                ' "%s"' \
-                % (relationship_type._name, definition_relationship_type._name),
+                u'assigned relationship type "{0}" is not a descendant of declared relationship '
+                u' type "{1}"'
+                .format(relationship_type._name, definition_relationship_type._name),
                 locator=container._locator, level=Issue.BETWEEN_TYPES)
 
     if relationship_type is not None:
@@ -256,9 +257,9 @@ def add_requirement_assignments(context, presentation, requirement_assignments,
                                             relationship_interface_definitions)
             requirement_assignments.append((requirement_name, requirement_assignment))
         else:
-            context.validation.report('requirement "%s" not declared at node type "%s" in "%s"'
-                                      % (requirement_name, presentation.type,
-                                         presentation._fullname),
+            context.validation.report(u'requirement "{0}" not declared at node type "{1}" in "{2}"'
+                                      .format(requirement_name, presentation.type,
+                                              presentation._fullname),
                                       locator=our_requirement_assignment._locator,
                                       level=Issue.BETWEEN_TYPES)
 
@@ -305,10 +306,10 @@ def merge_requirement_assignment_relationship(context, presentation, property_de
                     coerce_parameter_value(context, presentation, definition, prop)
             else:
                 context.validation.report(
-                    'relationship property "%s" not declared at definition of requirement "%s"'
-                    ' in "%s"'
-                    % (property_name, requirement._fullname,
-                       presentation._container._container._fullname),
+                    u'relationship property "{0}" not declared at definition of requirement "{1}"'
+                    u' in "{2}"'
+                    .format(property_name, requirement._fullname,
+                            presentation._container._container._fullname),
                     locator=our_relationship._get_child_locator('properties', property_name),
                     level=Issue.BETWEEN_TYPES)
 
@@ -330,10 +331,10 @@ def merge_requirement_assignment_relationship(context, presentation, property_de
                                 interface_definition, interface_name)
             else:
                 context.validation.report(
-                    'relationship interface "%s" not declared at definition of requirement "%s"'
-                    ' in "%s"'
-                    % (interface_name, requirement._fullname,
-                       presentation._container._container._fullname),
+                    u'relationship interface "{0}" not declared at definition of requirement "{1}"'
+                    u' in "{2}"'
+                    .format(interface_name, requirement._fullname,
+                            presentation._container._container._fullname),
                     locator=our_relationship._locator, level=Issue.BETWEEN_TYPES)
 
 

@@ -31,7 +31,7 @@ def not_negative_validator(field, presentation, context):
     field.default_validate(presentation, context)
     value = getattr(presentation, field.name)
     if (value is not None) and (value < 0):
-        context.validation.report('field "{0}" is negative: {1}'
+        context.validation.report(u'field "{0}" is negative: {1}'
                                   .format(field.name, safe_repr(value)),
                                   locator=presentation._get_child_locator(field.name),
                                   level=Issue.FIELD)
@@ -118,8 +118,8 @@ def list_length_validator(length):
         values = getattr(presentation, field.name)
         if isinstance(values, list):
             if len(values) != length:
-                context.validation.report('field "{0}" does not have exactly {1:d} elements in '
-                                          '"{2}": {3}'
+                context.validation.report(u'field "{0}" does not have exactly {1:d} elements in '
+                                          u'"{2}": {3}'
                                           .format(field.name, length, presentation._fullname,
                                                   safe_repr(values)),
                                           locator=presentation._get_child_locator(field.name),

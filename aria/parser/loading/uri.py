@@ -76,7 +76,7 @@ class UriTextLoader(Loader):
                     return
                 except DocumentNotFoundException:
                     pass
-        raise DocumentNotFoundException('document not found at URI: "%s"' % self.location)
+        raise DocumentNotFoundException(u'document not found at URI: "{0}"'.format(self.location))
 
     def close(self):
         if self._loader is not None:

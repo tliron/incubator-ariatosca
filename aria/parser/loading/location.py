@@ -54,8 +54,8 @@ class UriLocation(Location):
     def prefix(self):
         prefix = os.path.dirname(self.uri)
         if prefix and (as_file(prefix) is None):
-            # Yes, it's weird, but dirname handles URIs,
-            # too: http://stackoverflow.com/a/35616478/849021
+            # Yes, it's weird, but dirname handles URIs, too:
+            # http://stackoverflow.com/a/35616478/849021
             # We just need to massage it with a trailing slash
             prefix += '/'
         return prefix
@@ -79,4 +79,4 @@ class LiteralLocation(Location):
         return isinstance(location, LiteralLocation) and (location.content == self.content)
 
     def __str__(self):
-        return '<%s>' % self.name
+        return u'<{0}>'.format(self.name)

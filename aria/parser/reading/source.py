@@ -14,13 +14,15 @@ from ..loading import LiteralLocation, UriLocation
 from .yaml import YamlReader
 from .json import JsonReader
 from .jinja import JinjaReader
+from .python import PythonReader
 from .exceptions import ReaderNotFoundError
 
 
 EXTENSIONS = {
     '.yaml': YamlReader,
     '.json': JsonReader,
-    '.jinja': JinjaReader}
+    '.jinja': JinjaReader,
+    '.py': PythonReader}
 
 
 class ReaderSource(object):

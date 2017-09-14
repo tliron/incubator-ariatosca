@@ -1,9 +1,11 @@
 
-from .....collections import (SchemaDict, RequiredSchemaDict)
+from .. import Type
+from ....collections import (SchemaDict, RequiredSchemaDict)
 
 
-class Relationship(object):
+class Relationship(Type):
     def __init__(self):
+        super(Relationship, self).__init__()
         self.properties = RequiredSchemaDict()
         self.attributes = SchemaDict()
         self.interfaces = {}
@@ -15,9 +17,11 @@ class Root(Relationship):
         super(Root, self).__init__()
         from ... import tosca
 
-        self.attributes.schema['tosca_id'] = str
-        self.attributes.schema['tosca_name'] = str
-        self.attributes.schema['state'] = str
+        self.attributes.schema.update(
+            tosca_id=str,
+            tosca_name=str,
+            state=str,
+        )
         self.attributes['state'] = 'initial'
 
         self.interfaces['Configure'] = tosca.interfaces.relationship.Configure()
@@ -32,6 +36,8 @@ class DependsOn(Root):
 
 
 class HostedOn(Root):
+    ROLE = 'host'
+    
     def __init__(self):
         super(HostedOn, self).__init__()
         from ... import tosca
@@ -44,8 +50,10 @@ class AttachesTo(Root):
         super(AttachesTo, self).__init__()
         from ... import tosca
 
-        self.properties.schema['location'] = {'type': str, 'required': True}
-        self.properties.schema['device'] = str
+        self.properties.update(
+            location=str,
+            device=dict(type=str, required=False)
+        )
 
         self.attributes.schema['device'] = str
 

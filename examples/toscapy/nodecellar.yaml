@@ -1,0 +1,54 @@
+tosca_definitions_version: tosca_simple_yaml_1_0
+
+topology_template:
+
+  node_templates:
+  
+    vm:
+      type: tosca.nodes.Compute
+      attributes:
+        private_address: localhost
+      capabilities:
+        os:
+          properties:
+            architecture: x86_64
+            type: linux
+            distribution: ubuntu
+            version: 17.04
+        host:
+          properties:
+            num_cpus: 4
+      interfaces:
+        Standard:
+          create: scripts/vm/create.sh
+      requirements:
+        - local_storage:
+            node: disk
+            
+    disk:
+      type: tosca.nodes.BlockStorage
+      properties:
+        size: 10 GB
+
+    nginx:
+      type: tosca.nodes.WebServer
+      requirements:
+        - host:
+            node: vm
+
+    nodecellar:
+      type: tosca.nodes.WebApplication
+      properties:
+        component_version: 1.2
+        admin_credential:
+          user: aria
+          token: aria123
+      capabilities:
+        app_endpoint:
+          properties:
+            protocol: http
+            port: 8080
+            url_path: /nodecellar
+      requirements:
+        - host:
+            node: nginx

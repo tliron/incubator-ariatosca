@@ -19,6 +19,7 @@ from aria import extension
 
 from .simple_v1_0 import ToscaSimplePresenter1_0
 from .simple_nfv_v1_0 import ToscaSimpleNfvPresenter1_0
+from .simple_v1_0_py import ToscaSimplePyPresenter1_0
 
 
 @extension.parser
@@ -26,7 +27,7 @@ class ParserExtensions(object):
 
     @staticmethod
     def presenter_class():
-        return ToscaSimplePresenter1_0, ToscaSimpleNfvPresenter1_0
+        return ToscaSimplePresenter1_0, ToscaSimpleNfvPresenter1_0, ToscaSimplePyPresenter1_0
 
     @staticmethod
     def specification_package():
